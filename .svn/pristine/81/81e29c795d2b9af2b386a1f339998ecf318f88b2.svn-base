@@ -1,0 +1,425 @@
+﻿using OnlineBanking.Data.DAL;
+using OnlineBanking.Data.Models;
+using OnlineBanking.Web.Areas.ModulRadnik.ViewModels;
+using OnlineBanking.Web.Helper;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.Helpers;
+using System.Web.Mvc;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace OnlineBanking.Web.Areas.ModulRadnik.Controllers {
+
+    [Autorizacija(dozvoljenoZaRadnika: true, dozvoljenoZaKorisnika: false)]
+    public class RadnikController : Controller {
+        private DL_Context db = new DL_Context();
+        // GET: ModulRadnik/Radnik
+
+        public ActionResult Index() {
+            List<Drzava> lista = db.Drzave.ToList();
+            return View(lista);
+        }
+
+        public ActionResult PromjenaLozinke() {
+            PromjenaLozinkeVM model = new PromjenaLozinkeVM();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SnimiPromjenuLozinke(PromjenaLozinkeVM model) {
+            if (!ModelState.IsValid) {
+                return View("PromjenaLozinke", model);
+            }
+            int Id = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Radnik r = db.Radnici.Where(x => x.Id == Id).SingleOrDefault();
+            if (!Crypto.VerifyHashedPassword(r.PasswordHash, model.oldPasswordShow)) {
+                ViewData["StaraLozinka"] = "Stara lozinka nije ispravna!";
+                return View("PromjenaLozinke", model);
+            }
+            if (model.newPassword == model.oldPasswordShow) {
+                ViewData["StaraLozinka"] = "Stara lozinka i nova lozinka ne mogu biti iste!";
+                return View("PromjenaLozinke", model);
+            }
+            r.PasswordHash = Crypto.HashPassword(model.newPassword);
+            db.SaveChanges();
+            ViewData["PorukaPlava"] = "Uspješno ste promijenili lozinku!";
+            return View("PromjenaLozinke", model);
+        }
+        public ActionResult StanjeRacuna(int KlijentId)
+        {
+            StanjeRacunaVM model = new StanjeRacunaVM();
+            model.tipoviRacuna = new List<SelectListItem>();
+            model.tipoviRacuna.Add(new SelectListItem { Value = "0", Text = "Odaberite račun" });
+            model.tipoviRacuna.AddRange(getRacuni(KlijentId));
+            model.KlijentImePrezime = db.Klijenti.Where(x => x.Id == KlijentId).Select(x => x.Ime + " " + x.Prezime).FirstOrDefault();
+            return View(model);
+        }
+        public ActionResult StanjeRacunaDetalji(StanjeRacunaVM z)
+        {
+            Racun racun = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == z.BrojRacuna).SingleOrDefault();
+            StanjeRacunaDetaljiVM model = new StanjeRacunaDetaljiVM();
+            model.BrojRacuna = racun.BrojRacuna;
+            model.Stanje = racun.Stanje;
+            model.TipRacunaEnum = (TipRacuna)racun.TipRacuna;
+            model.Limit = racun.Limit;
+            model.Valuta = racun.Valuta;
+            model.DatumOtvaranja = racun.DatumOtvaranja;
+            model.ImePrezime = racun.Klijent.Ime + " " + racun.Klijent.Prezime;
+            return PartialView(model);
+        }
+        public ActionResult GeneratePDF(string BrojRacuna)
+        {
+            Racun racun = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == BrojRacuna).SingleOrDefault();
+            StanjeRacunaDetaljiVM model = new StanjeRacunaDetaljiVM();
+            model.Stanje = racun.Stanje;
+            model.TipRacunaEnum = (TipRacuna)racun.TipRacuna;
+            model.Limit = racun.Limit;
+            model.Valuta = racun.Valuta;
+            model.DatumOtvaranja = racun.DatumOtvaranja;
+            model.ImePrezime = racun.Klijent.Ime + " " + racun.Klijent.Prezime;
+            model.BrojRacuna = racun.BrojRacuna;
+            return new Rotativa.ViewAsPdf("StanjeRacunaDetaljiPDF", model);
+        }
+        public class DataSourceKlasa
+        {
+            public string ImePrezime { get; set; }
+            public string BrojRacuna { get; set; }
+            public string DatumOtvaranja { get; set; }
+            public TipRacuna TipRacuna { get; set; }
+            public double Stanje { get; set; }
+            public double Limit { get; set; }
+            public string Valuta { get; set; }
+        }
+        public ActionResult GenerateExcel(string BrojRacuna)
+        {
+            List<DataSourceKlasa> lista = new List<DataSourceKlasa>();
+            DataSourceKlasa exc = new DataSourceKlasa();
+            GridView gv = new GridView();
+            Racun r = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == BrojRacuna).SingleOrDefault();
+            exc.Stanje = r.Stanje;
+            exc.DatumOtvaranja = r.DatumOtvaranja;
+            exc.ImePrezime = r.Klijent.Ime + " " + r.Klijent.Prezime;
+            exc.BrojRacuna = r.BrojRacuna;
+            exc.TipRacuna = (TipRacuna)r.TipRacuna;
+            exc.Limit = r.Limit;
+            exc.Valuta = r.Valuta;
+            lista.Add(exc);
+            gv.DataSource = lista;
+            gv.DataBind();
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", "attachment; filename=StanjeRacuna.xls");
+            Response.ContentType = "application/ms-excel";
+            Response.Charset = "";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            gv.RenderControl(htw);
+            Response.Output.Write(sw.ToString());
+            Response.Flush();
+            Response.End();
+
+            return RedirectToAction("StanjeRacunaDetalji");
+        }
+        public ActionResult GenerateWord(string BrojRacuna)
+        {
+            List<DataSourceKlasa> lista = new List<DataSourceKlasa>();
+            DataSourceKlasa word = new DataSourceKlasa();
+            GridView gv = new GridView();
+            Racun r = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == BrojRacuna).SingleOrDefault();
+            word.Stanje = r.Stanje;
+            word.DatumOtvaranja = r.DatumOtvaranja;
+            word.ImePrezime = r.Klijent.Ime + " " + r.Klijent.Prezime;
+            word.BrojRacuna = r.BrojRacuna;
+            word.TipRacuna = (TipRacuna)r.TipRacuna;
+            word.Limit = r.Limit;
+            word.Valuta = r.Valuta;
+            lista.Add(word);
+            gv.DataSource = lista;
+            gv.DataBind();
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", "attachment; filename=StanjeRacuna.doc");
+            Response.ContentType = "application/vnd.ms-word";
+            Response.Charset = "";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            gv.RenderControl(htw);
+            Response.Output.Write(sw.ToString());
+            Response.Flush();
+            Response.End();
+
+            return RedirectToAction("StanjeRacunaDetalji");
+        }
+        public ActionResult GenerateXML(string BrojRacuna)
+        {
+            List<DataSourceKlasa> lista = new List<DataSourceKlasa>();
+            DataSourceKlasa word = new DataSourceKlasa();
+            GridView gv = new GridView();
+            Racun r = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == BrojRacuna).SingleOrDefault();
+            word.Stanje = r.Stanje;
+            word.DatumOtvaranja = r.DatumOtvaranja;
+            word.ImePrezime = r.Klijent.Ime + " " + r.Klijent.Prezime;
+            word.BrojRacuna = r.BrojRacuna;
+            word.TipRacuna = (TipRacuna)r.TipRacuna;
+            word.Limit = r.Limit;
+            word.Valuta = r.Valuta;
+            lista.Add(word);
+            gv.DataSource = lista;
+            gv.DataBind();
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", "attachment; filename=StanjeRacuna.xml");
+            Response.ContentType = "text/xml";
+            Response.Charset = "";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            gv.RenderControl(htw);
+            Response.Output.Write(sw.ToString());
+            Response.Flush();
+            Response.End();
+
+            return RedirectToAction("StanjeRacunaDetalji");
+        }
+        
+
+        public ActionResult LicniPodaci() {
+            int RadnikId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Radnik radnik = db.Radnici.Include(x => x.Opstina).Where(y => y.Id == RadnikId).SingleOrDefault();
+            LicniPodaciVM model = new LicniPodaciVM();
+            model.Ime = radnik.Ime;
+            model.Prezime = radnik.Prezime;
+            model.Email = radnik.Email;
+            model.Telefon = radnik.Telefon;
+            model.SlikaPath = radnik.SlikaPath;
+            model.DatumRodjenja = radnik.DatumRodjenja;
+            model.Ulica = radnik.Ulica;
+            model.BrojUlice = radnik.BrojUlice;
+            model.Opstina = radnik.Opstina;
+            model.RadnikId = RadnikId;
+
+            return View(model);
+        }
+
+        public ActionResult DodajKorisnickiRacun(int? uspjeh) {
+            NoviKlijentVM model = new NoviKlijentVM();
+            model.opstine = GetOpstinePrvaOpcija();
+            if (uspjeh == 1) {
+                ViewData["DodanKorisnik"] = "Novi korisnik je uspješno dodan.";
+            }
+            return View(model);
+        }
+        [ValidateAntiForgeryToken]
+        public ActionResult SnimiNoviKorisnickiRacun(NoviKlijentVM model) {
+            if (!ModelState.IsValid) {
+                model.opstine = GetOpstinePrvaOpcija();
+                return View("DodajKorisnickiRacun", model);
+            }
+            List<string> mejlovi = db.Klijenti.Select(x => x.Email).ToList();
+            for (int i = 0; i < mejlovi.Count(); i++)
+            {
+                if (mejlovi[i] == model.Email)
+                {
+                    model.opstine = GetOpstinePrvaOpcija();
+                    ViewData["e-mail"] = "e-mail je već zauzet!";
+                    return View("DodajKorisnickiRacun", model);
+                }
+            }    
+                
+            Klijent klijent = new Klijent();
+            string ImageName, physicalPath;
+            try {
+                ImageName = Guid.NewGuid().ToString() + System.IO.Path.GetFileName(model.File.FileName);
+                physicalPath = Server.MapPath("~/Content/img/" + ImageName);
+                model.File.SaveAs(physicalPath);
+            }
+            catch (Exception) {
+                ImageName = ""; physicalPath = "";
+            }
+            klijent.SlikaPath = ImageName;
+            klijent.Ime = model.Ime;
+            klijent.Prezime = model.Prezime;
+            klijent.DatumRodjenja = model.DatumRodjenja;
+            klijent.JMBG = model.JMBG;
+            klijent.Telefon = model.Telefon;
+            klijent.Email = model.Email;
+            klijent.Ulica = model.Ulica;
+            klijent.BrojUlice = model.BrojUlice;
+            klijent.OpstinaId = model.OpstinaId;
+            klijent.BrojPokusajaLogiranja = 0;
+
+            int seed = db.Racuni.Max(x => x.Id);
+            seed++;
+            klijent.Username = model.Prezime + seed.ToString();
+            klijent.PasswordHash = Membership.GeneratePassword(10, 2);
+
+            string poruka = "";
+            poruka += "<h3> Poštovani " + klijent.Ime + " " + klijent.Prezime + ",</h3><br/><br/>";
+            poruka += "Vaši login podaci za našu online aplikaciju su<br /><br />";
+            poruka += "<b>Username:</b> " + klijent.Username + "<br />";
+            poruka += "<b>Password:</b> " + klijent.PasswordHash + "<br />";
+            poruka += "<br /><br />Molimo Vas da prilikom prvog logiranja promijenite lozinku. <br /><br /> Vaša banka<br />";
+
+            Email.Posalji("FIT Banka", poruka, klijent.Email);
+            klijent.PasswordHash = Crypto.HashPassword(klijent.PasswordHash);
+
+            db.Klijenti.Add(klijent);
+            db.SaveChanges();
+            ModelState.Clear();
+            return RedirectToAction("DodajKorisnickiRacun", new { uspjeh = 1 });
+        }
+        [ValidateAntiForgeryToken]
+        public ActionResult EditRadnikProfil(LicniPodaciVM model, HttpPostedFileBase file) {
+            if (!ModelState.IsValid) {
+                return View("LicniPodaci", model);
+            }
+            int RadnikId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            string email = db.Radnici.Where(x => x.Id == RadnikId).Select(x => x.Email).SingleOrDefault();
+            List<string> mejlovi = db.Radnici.Where(x => x.Email != email).Select(x => x.Email).ToList();
+            for (int i = 0; i < mejlovi.Count(); i++)
+            {
+                if (mejlovi[i] == model.Email)
+                {
+                    ViewData["e-mail"] = "e-mail je već zauzet!";
+                    return View("LicniPodaci", model);
+                }
+            }
+
+
+            Radnik radnik = db.Radnici.Include(x => x.Opstina).Where(y => y.Id == model.RadnikId).SingleOrDefault();
+
+            if (file == null)
+                radnik.SlikaPath = model.SlikaPath;
+            else {
+                string ImageName, physicalPath;
+                try {
+                    ImageName = Guid.NewGuid().ToString() + System.IO.Path.GetFileName(file.FileName);
+                    physicalPath = Server.MapPath("~/Content/img/" + ImageName);
+                    file.SaveAs(physicalPath);
+                }
+                catch (Exception) {
+                    ImageName = ""; physicalPath = "";
+                }
+                radnik.SlikaPath = ImageName;
+            }
+            radnik.Email = model.Email;
+            radnik.Telefon = model.Telefon;
+            db.SaveChanges();
+
+            return RedirectToAction("LicniPodaci");
+        }
+
+        public ActionResult EditKlijentProfil(int KlijentId) {
+            Klijent klijent = db.Klijenti.Include(x => x.Opstina).Where(y => y.Id == KlijentId).SingleOrDefault();
+            EditLicniPodaciKlijentVM model = new EditLicniPodaciKlijentVM();
+            model.KlijentId = klijent.Id;
+            model.Ime = klijent.Ime;
+            model.Prezime = klijent.Prezime;
+            model.OpstinaId = klijent.OpstinaId;
+            model.Opstina = klijent.Opstina;
+            model.SlikaPath = klijent.SlikaPath;
+            model.Ulica = klijent.Ulica;
+            model.BrojUlice = klijent.BrojUlice;
+            model.DatumRodjenja = klijent.DatumRodjenja;
+            model.Email = klijent.Email;
+            model.Telefon = klijent.Telefon;
+            model.opstine = GetOpstine();
+            model.IsActive = !klijent.IsDeleted;
+            return PartialView(model);
+        }
+
+        [ValidateAntiForgeryToken]
+        public ActionResult SnimiKlijentProfil(EditLicniPodaciKlijentVM model, HttpPostedFileBase file) {
+            if (!ModelState.IsValid) {
+                return View("LicniPodaci", model);
+            }
+            
+            Klijent klijent = db.Klijenti.Include(x => x.Opstina).Where(y => y.Id == model.KlijentId).SingleOrDefault();
+
+            if (file == null)
+                klijent.SlikaPath = model.SlikaPath;
+            else {
+                string ImageName, physicalPath;
+                try {
+                    ImageName = Guid.NewGuid().ToString() + System.IO.Path.GetFileName(file.FileName);
+                    physicalPath = Server.MapPath("~/Content/img/" + ImageName);
+                    file.SaveAs(physicalPath);
+                }
+                catch (Exception) {
+                    ImageName = ""; physicalPath = "";
+                }
+                klijent.SlikaPath = ImageName;
+            }
+            string poruka = "";
+            if (klijent.IsDeleted != !model.IsActive) {
+                if (model.IsActive) {
+                    poruka += "Poštovani <h3> " + klijent.Ime + " " + klijent.Prezime + ",</h3><br/>";
+                    poruka += "Vaš korisnički račun je ponovo aktiviran.<br />";
+                    poruka += "<br /><br />Za dodatne informacije obratite se Vašoj obližnjoj poslovnici.<br /> Vaša banka<br />";
+                    Email.Posalji("FIT Banka", poruka, klijent.Email);
+                }
+                else {
+                    poruka += "Poštovani <h3> " + klijent.Ime + " " + klijent.Prezime + ",</h3><br/>";
+                    poruka += "Vaš korisnički račun je deaktiviran.<br />";
+                    poruka += "<br /><br />Za dodatne informacije obratite se Vašoj obližnjoj poslovnici.<br /> Vaša banka<br />";
+                    Email.Posalji("FIT Banka", poruka, klijent.Email);
+                }
+            }
+            klijent.Id = model.KlijentId;
+            klijent.IsDeleted = !model.IsActive;
+            klijent.BrojUlice = model.BrojUlice;
+            klijent.Ulica = model.Ulica;
+            klijent.Ime = model.Ime;
+            klijent.Prezime = model.Prezime;
+            klijent.OpstinaId = model.OpstinaId;
+            klijent.DatumRodjenja = model.DatumRodjenja;
+            klijent.Telefon = model.Telefon;
+            klijent.Email = model.Email;
+            db.SaveChanges();
+
+            return RedirectToAction("PrikaziKorisnickeRacune");
+        }
+
+        public ActionResult ObrisiKlijentProfil(int KlijentId) {
+            Klijent klijent = db.Klijenti.Find(KlijentId);
+            if (!klijent.IsDeleted) {
+                string poruka = "";
+                poruka += "Poštovani <h3> " + klijent.Ime + " " + klijent.Prezime + ",</h3><br/>";
+                poruka += "Vaš korisnički račun je deaktiviran.<br />";
+                poruka += "<br /><br />Za dodatne informacije obratite se Vašoj obližnjoj poslovnici.<br /> Vaša banka<br />";
+
+                Email.Posalji("FIT Banka", poruka, klijent.Email);
+            }
+            klijent.IsDeleted = true;
+            db.SaveChanges();
+            return RedirectToAction("PrikaziKorisnickeRacune");
+        }
+
+        public ActionResult PrikaziKorisnickeRacune() {
+            List<Klijent> klijenti = db.Klijenti.ToList();
+            return View(klijenti);
+        }
+
+        private List<SelectListItem> GetOpstine() {
+            List<SelectListItem> opstine = db.Opstina.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Naziv }).ToList();
+            return opstine;
+        }
+
+        private List<SelectListItem> GetOpstinePrvaOpcija() {
+            List<SelectListItem> opstine = new List<SelectListItem>();
+            opstine.Add(new SelectListItem { Value = "0", Text = "Odaberite opštinu" });
+            opstine.AddRange(db.Opstina.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Naziv }));
+            return opstine;
+        }
+        private IEnumerable<SelectListItem> getRacuni(int KlijentId)
+        {
+            return db.Racuni.Where(x => x.KlijentId == KlijentId && x.IsDeleted == false).Select(x => new SelectListItem { Text = (TipRacuna)x.TipRacuna + " - " + x.BrojRacuna, Value = x.BrojRacuna }).ToList();
+        }
+    }
+}

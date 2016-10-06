@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Datatables.Mvc.Extensions</name>
+    </assembly>
+    <members>
+        <member name="T:Datatables.Mvc.DataTableResultExt">
+            <summary>
+            This class represents an MVC Action result for
+            a jquery.datatables response.
+            </summary>
+        </member>
+    </members>
+</doc>

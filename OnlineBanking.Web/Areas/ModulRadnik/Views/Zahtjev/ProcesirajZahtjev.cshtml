@@ -1,0 +1,86 @@
+﻿@using OnlineBanking.Web.Areas.ModulRadnik.ViewModels
+@using OnlineBanking.Data.Models
+@using OnlineBanking.Web.Helper
+@{
+//Layout = null;
+}
+@model NoviRacunVM
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Novi bankovni račun</h3>
+    </div>
+</div>
+@using (Html.BeginForm("SnimiBankovniRacun", "Zahtjev"))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                    Snimi
+                </div>
+
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-6">                     
+                            <div class="form-group">
+                                @if (ViewData["SnimljenRacun"] == null)
+                                {
+                                    @Html.Label("Limit: ")
+                                    @Html.TextBoxFor(model => model.Limit, new { @class = "form-control"})
+                                }
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["SnimljenRacun"] != null)
+                                {
+                                    @Html.Label("Limit: ")
+                                    @Html.TextBoxFor(model => model.Limit, new { @class = "form-control", @readonly = "readonly" })
+                                }
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["SnimljenRacun"] == null)
+                                {
+                                    @Html.Label("Stanje: ")
+                                    @Html.TextBoxFor(model => model.Stanje, new { @class = "form-control"})
+                                }
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["SnimljenRacun"] != null)
+                                {
+                                    @Html.Label("Stanje: ")
+                                    @Html.TextBoxFor(model => model.Stanje, new { @class = "form-control", @readonly = "readonly" })
+                                }
+                            </div>
+                            @Html.HiddenFor(Model => Model.KlijentId)
+                            @Html.HiddenFor(Model => Model.TipRacunaId)
+                            @Html.HiddenFor(Model => Model.ZahtjevId)
+                            @Html.HiddenFor(Model => Model.TipValute)
+                            <div class="form-group">
+                            @if (ViewData["SnimljenRacun"] == null)
+                            {
+                                <input type="submit" value="Snimi račun" class="btn btn-primary btn-sm" />
+                            }
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["SnimljenRacun"] != null)
+                                {
+                                    <a href="/ModulRadnik/Zahtjev/ZahtjeviDodavanjeBankovniRacuni" class="btn btn-primary btn-sm" >Zahtjevi za bankovne račune</a>
+                                }
+                            </div>
+                            
+                            <div class="form-group">
+                                @if (ViewData["SnimljenRacun"] != null)
+                                {
+                                    <label class="alert alert-success"> @ViewData["SnimljenRacun"] </label>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

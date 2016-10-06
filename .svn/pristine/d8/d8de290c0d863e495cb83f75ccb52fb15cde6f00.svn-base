@@ -1,0 +1,268 @@
+﻿using OnlineBanking.Data.DAL;
+using OnlineBanking.Data.Models;
+using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels;
+using OnlineBanking.Web.Helper;
+using Rotativa;
+using Rotativa.Options;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Helpers;
+using System.Web.Mvc;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace OnlineBanking.Web.Areas.ModulKorisnik.Controllers {
+        
+    [Autorizacija(dozvoljenoZaRadnika: false, dozvoljenoZaKorisnika: true)]
+    public class KorisnikController : Controller {
+
+        private DL_Context db = new DL_Context();
+        
+
+        public ActionResult Index() {
+            List<Obavijest> obavijesti = db.Obavijesti.ToList();
+            return View(obavijesti);
+        }
+
+        #region Promjena lozinke
+        public ActionResult PromjenaLozinke()
+        {
+            PromjenaLozinkeVM model = new PromjenaLozinkeVM();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SnimiPromjenuLozinke(PromjenaLozinkeVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("PromjenaLozinke", model);
+            }
+            int Id = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Klijent k = db.Klijenti.Where(x => x.Id == Id).SingleOrDefault();
+            if (!Crypto.VerifyHashedPassword(k.PasswordHash, model.oldPasswordShow))
+            {
+                ViewData["StaraLozinka"] = "Stara lozinka nije ispravna!";
+                return View("PromjenaLozinke", model);
+            }
+            k.PasswordHash = Crypto.HashPassword(model.newPassword);
+            db.SaveChanges();
+            ViewData["PorukaPlava"] = "Uspješno ste promijenili lozinku!";
+            return View("PromjenaLozinke", model);
+        } 
+
+        #endregion
+
+        public ActionResult LicniPodaci() {
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Klijent klijent = db.Klijenti.Include(x => x.Opstina).Where(y => y.Id == KlijentId).SingleOrDefault();
+            LicniPodaciVM model = new LicniPodaciVM();
+            model.Ime = klijent.Ime;
+            model.Prezime = klijent.Prezime;
+            model.Email = klijent.Email;
+            model.Telefon = klijent.Telefon;
+            model.SlikaPath = klijent.SlikaPath;
+            model.DatumRodjenja = klijent.DatumRodjenja;
+            model.Adresa = klijent.Ulica + " " + klijent.BrojUlice;
+            model.Opstina = klijent.Opstina;
+            model.KlijentId = KlijentId;
+            return View(model);
+        }
+        [ValidateAntiForgeryToken]
+        public ActionResult EditKlijentProfil(LicniPodaciVM model, HttpPostedFileBase file) {
+            if (!ModelState.IsValid)
+                return View("LicniPodaci", model);
+
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            string email = db.Klijenti.Where(x => x.Id == KlijentId).Select(x => x.Email).SingleOrDefault();
+            List<string> mejlovi = db.Klijenti.Where(x => x.Email != email).Select(x => x.Email).ToList();
+            for (int i = 0; i < mejlovi.Count(); i++)
+            {
+                if (mejlovi[i] == model.Email)
+                {
+                    ViewData["e-mail"] = "e-mail je već zauzet!";
+                    return View("LicniPodaci", model);
+                }
+            }
+            Klijent klijent = db.Klijenti.Include(x => x.Opstina).Where(y => y.Id == model.KlijentId).SingleOrDefault();
+
+            if (file == null)
+                klijent.SlikaPath = model.SlikaPath;
+            else {
+                string ImageName, physicalPath;
+                try {
+                    ImageName = Guid.NewGuid().ToString() + System.IO.Path.GetFileName(file.FileName);
+                    physicalPath = Server.MapPath("~/Content/img/" + ImageName);
+                    file.SaveAs(physicalPath);
+                }
+                catch (Exception) {
+                    ImageName = ""; physicalPath = "";
+                }
+                klijent.SlikaPath = ImageName;
+            }
+            klijent.Email = model.Email;
+            klijent.Telefon = model.Telefon;
+            db.SaveChanges();
+
+            return RedirectToAction("LicniPodaci");
+        }
+
+
+        #region Stanje racuna
+
+
+        public ActionResult StanjeRacuna()
+        {
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            StanjeRacunaVM model = new StanjeRacunaVM();
+            //model.tipoviRacuna = new List<SelectListItem>();
+            //model.tipoviRacuna.Add(new SelectListItem { Value = "0", Text = "Odaberite račun" });
+            //model.tipoviRacuna.AddRange(getRacuni(KlijentId));
+            
+            model.tipoviRacuna = GetRacuni(KlijentId);
+            return View(model);
+        }
+
+        [ValidateAntiForgeryToken]
+        public ActionResult StanjeRacunaDetalji(StanjeRacunaVM z)
+        {
+            Racun racun = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == z.BrojRacuna).SingleOrDefault();
+            StanjeRacunaDetaljiVM model = new StanjeRacunaDetaljiVM();
+            model.BrojRacuna = racun.BrojRacuna;
+            model.Stanje = racun.Stanje;
+            model.TipRacunaEnum = (TipRacuna)racun.TipRacuna;
+            model.Limit = racun.Limit;
+            model.Valuta = racun.Valuta;
+            model.DatumOtvaranja = racun.DatumOtvaranja;
+            model.ImePrezime = racun.Klijent.Ime + " " + racun.Klijent.Prezime;
+            return PartialView(model);
+        }
+        
+        #endregion
+
+        [ActionDownload]
+        public ActionResult GeneratePDF(string BrojRacuna)
+        {
+            Racun racun = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == BrojRacuna).SingleOrDefault();
+            StanjeRacunaDetaljiVM model = new StanjeRacunaDetaljiVM();
+            model.Stanje = racun.Stanje;
+            model.TipRacunaEnum = (TipRacuna)racun.TipRacuna;
+            model.Limit = racun.Limit;
+            model.Valuta = racun.Valuta;
+            model.DatumOtvaranja = racun.DatumOtvaranja;
+            model.ImePrezime = racun.Klijent.Ime + " " + racun.Klijent.Prezime;
+            model.BrojRacuna = racun.BrojRacuna;
+            return new ViewAsPdf("StanjeRacunaDetaljiPDF", model) { FileName = "StanjeRacuna.pdf", PageSize = Size.A4};
+        }
+        public class DataSourceKlasa
+        {
+            public string ImePrezime { get; set;}
+            public string BrojRacuna { get; set; }
+            public string DatumOtvaranja { get; set; }
+            public TipRacuna TipRacuna { get; set; }
+            public double Stanje { get; set; }
+            public double Limit { get; set; }
+            public string Valuta { get; set; }
+        }
+        public ActionResult GenerateExcel(string BrojRacuna)
+        {
+            List<DataSourceKlasa> lista = new List<DataSourceKlasa>();
+            DataSourceKlasa exc = new DataSourceKlasa();
+            GridView gv = new GridView();
+            Racun r = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == BrojRacuna).SingleOrDefault();
+            exc.Stanje = r.Stanje;
+            exc.DatumOtvaranja = r.DatumOtvaranja;
+            exc.ImePrezime = r.Klijent.Ime + " " + r.Klijent.Prezime;
+            exc.BrojRacuna = r.BrojRacuna;
+            exc.TipRacuna = (TipRacuna)r.TipRacuna;
+            exc.Limit = r.Limit;
+            exc.Valuta = r.Valuta;
+            lista.Add(exc);
+            gv.DataSource = lista;
+            gv.DataBind();
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", "attachment; filename=StanjeRacuna.xls");
+            Response.ContentType = "application/ms-excel";
+            Response.Charset = "";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            gv.RenderControl(htw);
+            Response.Output.Write(sw.ToString());
+            Response.Flush();
+            Response.End();
+
+            return RedirectToAction("StanjeRacunaDetalji");
+        }
+        public ActionResult GenerateWord(string BrojRacuna)
+        {
+            List<DataSourceKlasa> lista = new List<DataSourceKlasa>();
+            DataSourceKlasa word = new DataSourceKlasa();
+            GridView gv = new GridView();
+            Racun r = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == BrojRacuna).SingleOrDefault();
+            word.Stanje = r.Stanje;
+            word.DatumOtvaranja = r.DatumOtvaranja;
+            word.ImePrezime = r.Klijent.Ime + " " + r.Klijent.Prezime;
+            word.BrojRacuna = r.BrojRacuna;
+            word.TipRacuna = (TipRacuna)r.TipRacuna;
+            word.Limit = r.Limit;
+            word.Valuta = r.Valuta;
+            lista.Add(word);
+            gv.DataSource = lista;
+            gv.DataBind();
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", "attachment; filename=StanjeRacuna.doc");
+            Response.ContentType = "application/vnd.ms-word";
+            Response.Charset = "";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            gv.RenderControl(htw);
+            Response.Output.Write(sw.ToString());
+            Response.Flush();
+            Response.End();
+
+            return RedirectToAction("StanjeRacunaDetalji");
+        }
+        public ActionResult GenerateXML(string BrojRacuna)
+        {
+            List<DataSourceKlasa> lista = new List<DataSourceKlasa>();
+            DataSourceKlasa word = new DataSourceKlasa();
+            GridView gv = new GridView();
+            Racun r = db.Racuni.Include(x => x.Klijent).Where(x => x.BrojRacuna == BrojRacuna).SingleOrDefault();
+            word.Stanje = r.Stanje;
+            word.DatumOtvaranja = r.DatumOtvaranja;
+            word.ImePrezime = r.Klijent.Ime + " " + r.Klijent.Prezime;
+            word.BrojRacuna = r.BrojRacuna;
+            word.TipRacuna = (TipRacuna)r.TipRacuna;
+            word.Limit = r.Limit;
+            word.Valuta = r.Valuta;
+            lista.Add(word);
+            gv.DataSource = lista;
+            gv.DataBind();
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", "attachment; filename=StanjeRacuna.xml");
+            Response.ContentType = "text/xml";
+            Response.Charset = "";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            gv.RenderControl(htw);
+            Response.Output.Write(sw.ToString());
+            Response.Flush();
+            Response.End();
+
+            return RedirectToAction("StanjeRacunaDetalji");
+        }
+        private List<SelectListItem> GetRacuni(int KlijentId)
+        {
+            return db.Racuni.Where(x => x.KlijentId == KlijentId && x.IsDeleted == false).Select(x => new SelectListItem { Text = (TipRacuna)x.TipRacuna + " - " + x.BrojRacuna, Value = x.BrojRacuna}).ToList();
+        }
+    }
+}

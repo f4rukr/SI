@@ -1,0 +1,401 @@
+﻿using OnlineBanking.Data.DAL;
+using OnlineBanking.Data.Models;
+using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels;
+using OnlineBanking.Web.Helper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
+using System.Data.Entity;
+using System.Globalization;
+
+namespace OnlineBanking.Web.Areas.ModulKorisnik.Controllers {
+    [Autorizacija(dozvoljenoZaRadnika: false, dozvoljenoZaKorisnika: true)]
+
+    public class UplatnicaController : Controller {
+
+        // GET: ModulKorisnik/Uplatnica
+        private DL_Context db = new DL_Context();
+
+        public ActionResult Index() {
+            return View();
+        }
+
+        #region Uplatnica za JP
+        public ActionResult NovaUplatnicaZaJP(int? uspjeh) {
+            UplatnicaZaJPVM model = new UplatnicaZaJPVM();
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Klijent klijent = db.Klijenti.Where(x => x.Id == KlijentId).SingleOrDefault();
+            model.KlijentId = KlijentId;
+            model.Datum = DateTime.Now.ToString();
+            model.UplatioJe = "Ime i prezime: " + klijent.Ime + " " + klijent.Prezime + "\n";
+            model.UplatioJe += "Adresa: " + klijent.Opstina.Naziv + ", " + klijent.Ulica + " " + klijent.BrojUlice + "\n";
+            model.UplatioJe += "Telefon: " + klijent.Telefon;
+            model.StatusUplatnice = 1;            
+            List<Racun> ListaRacuna = db.Racuni.Where(x => x.KlijentId == KlijentId && x.IsDeleted == false).ToList();
+            model.racuni = new List<SelectListItem>();
+            model.racuni.Add(new SelectListItem { Value = "0", Text = "Odaberite račun" });
+            model.racuni.AddRange(ListaRacuna.Select(x => new SelectListItem {
+                Value = x.Id.ToString(),
+                Text =
+                x.BrojRacuna + ", Stanje: " + x.Stanje.ToString() + " " + x.Valuta
+            }));
+            if (uspjeh == 1) {
+                ViewData["ZahtjevPoslan"] = "Zahtjev za uplatnicu je uspješno poslan.";
+                model.Datum = "";
+            }
+            return View(model);
+        }
+         
+
+        [HttpPost]
+        public ActionResult SnimiUplatnicuJP(UplatnicaZaJPVM model) {
+            if (!ModelState.IsValid) {
+                List<Racun> ListaRacuna = db.Racuni.Where(x => x.KlijentId == model.KlijentId && x.IsDeleted == false).ToList();
+                model.racuni = new List<SelectListItem>();
+                model.racuni.Add(new SelectListItem { Value = "0", Text = "Odaberite račun" });
+                model.racuni.AddRange(ListaRacuna.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.BrojRacuna + " - " + x.Stanje + " " + x.Valuta }));
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                Klijent klijent = db.Klijenti.Where(x => x.Id == KlijentId).SingleOrDefault();
+                string uplatioJe = "";
+                uplatioJe = "Ime i prezime: " + klijent.Ime + " " + klijent.Prezime + "\n";
+                uplatioJe += "Adresa: " + klijent.Opstina.Naziv + ", " + klijent.Ulica + " " + klijent.BrojUlice + "\n";
+                uplatioJe += "Telefon: " + klijent.Telefon;
+                model.UplatioJe = "";
+                model.UplatioJe = uplatioJe;
+                return View("NovaUplatnicaZaJP", model);
+            }
+
+            Uplatnica novaUplatnica = new Uplatnica();
+            novaUplatnica.Datum = model.Datum;
+            novaUplatnica.Iznos = model.Iznos;
+            novaUplatnica.KlijentId = model.KlijentId;
+            novaUplatnica.RacunId = model.RacunId;
+            novaUplatnica.RadnikId = null;
+            novaUplatnica.StatusUplatnice = (StatusUplatnice)model.StatusUplatnice;
+            novaUplatnica.SvrhaDoznake = model.SvrhaDoznake;
+            novaUplatnica.RacunPrimaoca = model.RacunPrimaoca;
+            novaUplatnica.Primaoc = model.Primaoc;
+            novaUplatnica.Hitno = model.Hitno;
+            novaUplatnica.UplatioJe = model.UplatioJe;
+            novaUplatnica.BrPoreznogObveznika = model.BrPoreznogObveznika;
+            novaUplatnica.VrstaPrihoda = model.VrstaPrihoda;
+            novaUplatnica.Opcina = model.Opcina;
+            novaUplatnica.PocetakPoreznogPerioda = model.PocetakPoreznogPerioda;
+            novaUplatnica.KrajPoreznogPerioda = model.KrajPoreznogPerioda;
+            novaUplatnica.BudzetskaOrganizacija = model.BudzetskaOrganizacija;
+            novaUplatnica.PozivNaBroj = model.PozivNaBroj;
+
+            db.Uplatnice.Add(novaUplatnica);
+            db.SaveChanges();
+            ModelState.Clear();
+            return RedirectToAction("NovaUplatnicaZaJP", new { uspjeh = 1 });
+        }
+
+        #endregion
+
+        #region Uplatnica za prenos
+        public ActionResult NovaUplatnicaZaPrenos(int? uspjeh) {
+
+            UplatnicaZaPrenosVM model = new UplatnicaZaPrenosVM();
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Klijent klijent = db.Klijenti.Where(x => x.Id == KlijentId).SingleOrDefault();
+            model.KlijentId = KlijentId;
+            string uplatioJe = "";       
+            uplatioJe = "Ime i prezime: " + klijent.Ime + " " + klijent.Prezime + "\n";
+            uplatioJe += "Adresa: " + klijent.Opstina.Naziv + ", " + klijent.Ulica + " " + klijent.BrojUlice + "\n";
+            uplatioJe += "Telefon: " + klijent.Telefon;
+            model.UplatioJe = uplatioJe;
+            model.NazivPredloska = " ";
+
+            List<Racun> ListaRacuna = db.Racuni.Where(x=>x.KlijentId == KlijentId && x.IsDeleted == false).ToList();
+            model.racuni = new List<SelectListItem>();
+            model.racuni.Add(new SelectListItem { Value = "0", Text = "Odaberite račun" });
+            model.racuni.AddRange(ListaRacuna.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.BrojRacuna + ", Stanje: " + x.Stanje + " " + x.Valuta }));
+
+            if (uspjeh == 1) {
+                ViewData["ZahtjevPoslan"] = "Zahtjev za uplatnicu je uspješno poslan.";
+            }
+
+            return View(model);
+        }
+
+
+        public ActionResult SnimiUplatnicuPrenos(UplatnicaZaPrenosVM model) {
+
+            model.NazivPredloska = " ";
+
+            if (!ModelState.IsValid) {
+                List<Racun> ListaRacuna = db.Racuni.Where(x => x.KlijentId == model.KlijentId && x.IsDeleted == false).ToList();
+                model.racuni = new List<SelectListItem>();
+                model.racuni.Add(new SelectListItem { Value = "0", Text = "Odaberite račun" });
+                model.racuni.AddRange(ListaRacuna.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.BrojRacuna + " - " + x.Stanje + " " + x.Valuta }));
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                Klijent klijent = db.Klijenti.Where(x => x.Id == KlijentId).SingleOrDefault();
+                string uplatioJe = "";
+                uplatioJe = "Ime i prezime: " + klijent.Ime + " " + klijent.Prezime + "\n";
+                uplatioJe += "Adresa: " + klijent.Opstina.Naziv + ", " + klijent.Ulica + " " + klijent.BrojUlice + "\n";
+                uplatioJe += "Telefon: " + klijent.Telefon;
+                model.UplatioJe = "";
+                model.UplatioJe = uplatioJe;
+                return View("NovaUplatnicaZaPrenos", model);
+            }
+                        
+            Uplatnica uplatnica = new Uplatnica();
+
+            db.Uplatnice.Add(uplatnica);
+            uplatnica.SvrhaDoznake = model.SvrhaDoznake;
+            uplatnica.UplatioJe = model.UplatioJe;
+            uplatnica.Primaoc = model.Primaoc;
+            uplatnica.RacunPrimaoca = model.RacunPrimaoca;
+            uplatnica.Iznos = model.Iznos;
+            uplatnica.Hitno = model.Hitno;
+            uplatnica.RacunId = model.RacunId;
+            uplatnica.Datum = DateTime.Now.ToString();
+            uplatnica.KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            uplatnica.StatusUplatnice = (StatusUplatnice)1;
+
+            db.SaveChanges();
+            //ViewData["SnimljenaUplatnicaPrenos"] = "Nalog za prenos je uspješno poslan!";
+            if(model.NazivPredloska == " ")
+            {
+                ViewData["ZahtjevPoslan"] = "Zahtjev za uplatnicu je uspješno poslan.";
+                return View("NovaUplatnicaZaPrenos", model);
+            }
+
+            return PartialView("SnimljenPredlozak");
+        }
+
+
+        #endregion
+
+        public ActionResult NoviPredlozak()
+        {
+            return View();
+        }
+
+        public ActionResult AddPredlozakUplatnicaZaPrenos()
+        {
+            PredlozakZaPrenosVM model = new PredlozakZaPrenosVM();
+             int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            model.racuni = db.Racuni.Where(x => x.KlijentId == KlijentId).Select(x => new SelectListItem { Text = (TipRacuna)x.TipRacuna + " - " + x.BrojRacuna, Value = x.Id.ToString() }).ToList();
+            Klijent Klijent = db.Klijenti.Find(KlijentId);
+            model.UplatioJe = "Ime i prezime: " + Klijent.Ime + " " + Klijent.Prezime + "\n";
+            model.UplatioJe += "Adresa: " + Klijent.Opstina.Naziv + ", " + Klijent.Ulica + " " + Klijent.BrojUlice + "\n";
+            model.UplatioJe += "Telefon: " + Klijent.Telefon;
+            return PartialView(model);
+        }
+        public ActionResult SnimiPredlozakUplatnicaZaPrenos(PredlozakZaPrenosVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.racuni = getRacuni(KlijentId);
+                return PartialView("AddPredlozakUplatnicaZaPrenos", model);
+            }
+            Predlozak predlozak = new Predlozak();
+            predlozak.NazivPredloska = model.NazivPredloska;
+            predlozak.SvrhaDoznake = model.SvrhaDoznake;
+            predlozak.Primaoc = model.Primaoc;
+            predlozak.Datum = DateTime.Now.ToString();
+            predlozak.Iznos = model.Iznos;
+            predlozak.Hitno = model.Hitno;
+            predlozak.RacunId = model.RacunId;
+            predlozak.RacunPrimaoca = model.RacunPrimaoca;
+            predlozak.UplatioJe = model.UplatioJe;
+            predlozak.KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            ViewData["SnimljenPredlozak"] = "Predložak je uspješno snimljen!";
+            predlozak.VrstaPredloska = "Nalog za prenos";
+            db.Predlozak.Add(predlozak);
+            db.SaveChanges();
+            return View("SnimljenPredlozak");
+        }
+        public ActionResult AddPredlozakUplatnicaZaJP()
+        {
+            PredlozakZaJPVM model = new PredlozakZaJPVM();
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            model.racuni = getRacuni(KlijentId);
+            Klijent Klijent = db.Klijenti.Include(x=> x.Opstina).Where(x => x.Id == KlijentId).SingleOrDefault();
+            model.UplatioJe = "Ime i prezime: " + Klijent.Ime + " " + Klijent.Prezime + "\n";
+            model.UplatioJe += "Adresa: " + Klijent.Opstina.Naziv + ", " + Klijent.Ulica + " " + Klijent.BrojUlice + "\n";
+            model.UplatioJe += "Telefon: " + Klijent.Telefon;
+            model.Opcina = Klijent.Opstina.BrojOpstine;
+            return PartialView(model);
+        }
+        public ActionResult SnimiPredlozakUplatnicaZaJP(PredlozakZaJPVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.racuni = getRacuni(KlijentId);
+                return PartialView("AddPredlozakUplatnicaZaJP", model);
+            }
+            DateTime pocetak;
+            DateTime.TryParse(model.PocetakPoreznogPerioda,out pocetak);
+            DateTime kraj;
+            DateTime.TryParse(model.KrajPoreznogPerioda,out kraj);            
+            if (pocetak > kraj)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.racuni = getRacuni(KlijentId);
+                ViewData["DatumGreska"] = "Početni datum ne može biti poslije krajnjeg datuma!";
+                return PartialView("AddPredlozakUplatnicaZaJP", model);
+            }
+            Predlozak predlozak = new Predlozak();
+            predlozak.NazivPredloska = model.NazivPredloska;
+            predlozak.SvrhaDoznake = model.SvrhaDoznake;
+            predlozak.Primaoc = model.Primaoc;
+            predlozak.Datum = DateTime.Now.ToString();
+            predlozak.Iznos = model.Iznos;
+            predlozak.Hitno = model.Hitno;
+            predlozak.RacunId = model.RacunId;
+            predlozak.UplatioJe = model.UplatioJe;
+            predlozak.RacunPrimaoca = model.RacunPrimaoca;
+            predlozak.KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            predlozak.BrPoreznogObveznika = model.BrPoreznogObveznika;
+            predlozak.VrstaPrihoda = model.VrstaPrihoda;
+            predlozak.Opcina = model.Opcina;
+            predlozak.PocetakPoreznogPerioda = model.PocetakPoreznogPerioda;
+            predlozak.KrajPoreznogPerioda = model.KrajPoreznogPerioda;
+            predlozak.BudzetskaOrganizacija = model.BudzetskaOrganizacija;
+            predlozak.PozivNaBroj = model.PozivNaBroj;
+            predlozak.VrstaPredloska = "Nalog za plaćanje JP";
+            ViewData["SnimljenPredlozak"] = "Predložak je uspješno snimljen!";
+
+            db.Predlozak.Add(predlozak);
+            db.SaveChanges();
+            return View("SnimljenPredlozak");
+        }
+        public ActionResult MojiPredlosci()
+        {
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            List<Predlozak> listaPredlozaka = db.Predlozak.Where(x => x.KlijentId == KlijentId && x.IsDeleted == false).ToList();
+            return View(listaPredlozaka);
+        }
+        public ActionResult PrikaziPredlozak(int PredlozakId)
+        {
+            
+            Predlozak predlozak = db.Predlozak.Find(PredlozakId);
+            if (predlozak.VrstaPredloska == "Nalog za prenos")
+            {
+                PredlozakZaPrenosVM model = new PredlozakZaPrenosVM();
+                model.PredlozakId = PredlozakId;
+                model.Hitno = predlozak.Hitno;
+                model.NazivPredloska = predlozak.NazivPredloska;
+                model.UplatioJe = predlozak.UplatioJe;
+                model.SvrhaDoznake = predlozak.SvrhaDoznake;
+                model.Primaoc = predlozak.Primaoc;
+                model.RacunPrimaoca = predlozak.RacunPrimaoca;
+                model.Iznos = predlozak.Iznos;
+                model.RacunId = predlozak.RacunId;
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.racuni = getRacuni(KlijentId);
+                return PartialView("PredlozakZaPrenosDetalji", model);
+            }
+            else
+            {
+                PredlozakZaJPVM model = new PredlozakZaJPVM();
+                model.PredlozakId = PredlozakId;
+                model.Hitno = predlozak.Hitno;
+                model.NazivPredloska = predlozak.NazivPredloska;
+                model.UplatioJe = predlozak.UplatioJe;
+                model.SvrhaDoznake = predlozak.SvrhaDoznake;
+                model.Primaoc = predlozak.Primaoc;
+                model.RacunPrimaoca = predlozak.RacunPrimaoca;
+                model.Iznos = predlozak.Iznos;
+                model.RacunId = predlozak.RacunId;
+                model.BrPoreznogObveznika = predlozak.BrPoreznogObveznika;
+                model.VrstaPrihoda = predlozak.VrstaPrihoda;
+                model.Opcina = predlozak.Opcina;
+                model.PocetakPoreznogPerioda = predlozak.PocetakPoreznogPerioda;
+                model.KrajPoreznogPerioda = predlozak.KrajPoreznogPerioda;
+                model.BudzetskaOrganizacija = predlozak.BudzetskaOrganizacija;
+                model.PozivNaBroj = predlozak.PozivNaBroj;
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.racuni = getRacuni(KlijentId);
+                return PartialView("PredlozakZaJPDetalji", model);
+            }
+        }
+        public ActionResult SnimiUplatnicuZaPrenos(PredlozakZaPrenosVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.racuni = getRacuni(KlijentId);
+                return PartialView("PredlozakZaPrenosDetalji", model);
+            }
+            Uplatnica uplatnica = new Uplatnica();
+            db.Uplatnice.Add(uplatnica);
+            uplatnica.SvrhaDoznake = model.SvrhaDoznake;
+            uplatnica.UplatioJe = model.UplatioJe;
+            uplatnica.Primaoc = model.Primaoc;
+            uplatnica.RacunPrimaoca = model.RacunPrimaoca;
+            uplatnica.Iznos = model.Iznos;
+            uplatnica.Hitno = model.Hitno;
+            uplatnica.RacunId = model.RacunId;
+            uplatnica.Datum = DateTime.Now.ToString();
+            uplatnica.KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            uplatnica.StatusUplatnice = (StatusUplatnice)1;
+            uplatnica.PredlozakId = model.PredlozakId;
+            db.SaveChanges();
+            ViewData["SnimljenPredlozak"] = "Nalog za prenos je uspješno procesiran!";
+            return PartialView("SnimljenPredlozak");
+        }
+        public ActionResult SnimiUplatnicuZaJP(PredlozakZaJPVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.racuni = getRacuni(KlijentId);
+                return PartialView("PredlozakZaJPDetalji", model);
+            }
+            DateTime pocetak;
+            DateTime.TryParseExact(model.PocetakPoreznogPerioda, "mm/dd/yyyy" , CultureInfo.InvariantCulture, DateTimeStyles.None, out pocetak);
+            DateTime kraj;
+            DateTime.TryParseExact(model.KrajPoreznogPerioda, "mm/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out kraj);
+            if (pocetak > kraj)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.racuni = getRacuni(KlijentId);
+                ViewData["DatumGreska"] = "Početni datum ne može biti poslije krajnjeg datuma!";
+                return PartialView("PredlozakZaJPDetalji", model);
+            }
+            Uplatnica uplatnica = new Uplatnica();
+            db.Uplatnice.Add(uplatnica);
+            uplatnica.SvrhaDoznake = model.SvrhaDoznake;
+            uplatnica.UplatioJe = model.UplatioJe;
+            uplatnica.Primaoc = model.Primaoc;
+            uplatnica.RacunPrimaoca = model.RacunPrimaoca;
+            uplatnica.Iznos = model.Iznos;
+            uplatnica.Hitno = model.Hitno;
+            uplatnica.RacunId = model.RacunId;
+            uplatnica.Datum = DateTime.Now.ToString();
+            uplatnica.BrPoreznogObveznika = model.BrPoreznogObveznika;
+            uplatnica.VrstaPrihoda = model.VrstaPrihoda;
+            uplatnica.Opcina = model.Opcina;
+            uplatnica.PocetakPoreznogPerioda = model.PocetakPoreznogPerioda;
+            uplatnica.KrajPoreznogPerioda = model.KrajPoreznogPerioda;
+            uplatnica.BudzetskaOrganizacija = model.BudzetskaOrganizacija;
+            uplatnica.PozivNaBroj = model.PozivNaBroj;
+            uplatnica.VrstaPrihoda = model.VrstaPrihoda;
+            uplatnica.KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            uplatnica.StatusUplatnice = (StatusUplatnice)1;
+            uplatnica.PredlozakId = model.PredlozakId;
+            db.SaveChanges();
+            ViewData["SnimljenPredlozak"] = "Nalog za plaćanje javnih prihoda je uspješno procesiran!";
+            return PartialView("SnimljenPredlozak");
+        }
+        public ActionResult ObrisiPredlozak(int PredlozakId)
+        {
+            Predlozak predlozak = db.Predlozak.Find(PredlozakId);
+            predlozak.IsDeleted = true;
+            db.SaveChanges();
+            return RedirectToAction("MojiPredlosci");
+        }
+        private List<SelectListItem> getRacuni(int KlijentId)
+        {
+            return db.Racuni.Where(x => x.KlijentId == KlijentId && x.IsDeleted == false).Select(x => new SelectListItem { Text = (TipRacuna)x.TipRacuna + " - " + x.BrojRacuna, Value = x.Id.ToString() }).ToList();
+        }
+
+    }
+}

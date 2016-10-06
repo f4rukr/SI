@@ -1,0 +1,91 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+@model UplatnicaZaPrenosVM
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Nalog za prenos</h3>
+    </div>
+</div>
+
+@using (Html.BeginForm("SnimiUplatnicuPrenos", "Uplatnica", FormMethod.Post, new { @class = "form-horizontal" })) {
+    @Html.HiddenFor(Model => Model.KlijentId)
+    @Html.HiddenFor(Model => Model.UplatioJe)
+
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    @Html.Label("Primaoc: ")
+                    @Html.TextAreaFor(Model => Model.Primaoc, new { @class = "form-control", @cols = "5", @rows = "3", style = "resize:none" })
+                    @Html.ValidationMessageFor(model => model.Primaoc, "", new { @class = "text-danger" })
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    @Html.Label("Svrha doznake: ")
+                    @Html.TextAreaFor(Model => Model.SvrhaDoznake, new { @class = "form-control", @cols = "5", @rows = "3", style = "resize:none" })
+                    @Html.ValidationMessageFor(model => model.SvrhaDoznake, "", new { @class = "text-danger" })
+                </div>
+            </div><!-- col-sm-6 -->
+        </div><!-- row -->
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    @Html.Label("Račun pošiljaoca: ")
+                    @Html.DropDownListFor(Model => Model.RacunId, Model.racuni, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.RacunId, "", new { @class = "text-danger" })
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    @Html.Label("Račun primaoca: ")
+                    @Html.TextBoxFor(Model => Model.RacunPrimaoca, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.RacunPrimaoca, "", new { @class = "text-danger" })
+                </div>
+            </div><!-- col-sm-6 -->
+        </div><!-- row -->
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    @Html.Label("Iznos: ")
+                    @Html.TextBoxFor(Model => Model.Iznos, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Iznos, "", new { @class = "text-danger" })
+                </div>
+            </div><!-- col-sm-6 -->
+            <div class="col-sm-6">
+                <div class="col-md-10">
+                    @Html.Label("Hitno:")
+                    <label class="checkbox-inline">
+                        @Html.RadioButtonFor(Model => Model.Hitno, "true") Da
+                    </label>
+                    <label class="checkbox-inline">
+                        @Html.RadioButtonFor(Model => Model.Hitno, "false") Ne
+                    </label>
+                </div>
+            </div><!-- col-sm-6 -->
+        </div><!-- row -->
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group no-margin-hr">
+                    @Html.Label("Uplatio je: ")
+                    @Html.TextAreaFor(Model => Model.UplatioJe, new { @class = "form-control", @readonly = "readonly", @cols = "5", @rows = "3", style = "resize:none" })
+                </div>
+            </div><!-- col-sm-6 -->
+        </div><!-- row -->
+    </div><!-- Panel body -->
+    <div class="panel-footer text-right">
+        <input type="submit" value="Snimi" class="btn btn-primary btn-sm" />
+    </div>
+
+}
+
+<script>
+    $(function () {
+        $("#datepicker").datepicker();
+    });
+</script>
+<script>
+    $(function () {
+        $("#datepicker2").datepicker();
+    });
+</script>

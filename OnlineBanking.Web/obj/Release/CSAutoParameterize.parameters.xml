@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="MyConnectionString-Web.config Connection String" description="MyConnectionString Connection String used in web.config by the application to access the database." defaultValue="Data Source=app.fit.ba, 1433; Initial Catalog = si102; Integrated Security=false; User Id = si102; Password= 2rRtr_51 ; MultipleActiveResultSets=true;" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="D:\\FIT\ Mostar\\3\.godina\\5\.\ semestar\\SI\\SEMINARSKI\\OnlineBanking\\OnlineBanking\.Web\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='MyConnectionString']/@connectionString" />
+  </parameter>
+</parameters>

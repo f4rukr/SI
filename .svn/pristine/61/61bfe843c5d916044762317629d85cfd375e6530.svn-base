@@ -1,0 +1,68 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+@model ZahtjevBrisanjeRacunaVM
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Zahtjev za brisanje bankovnog računa</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                Zahtjev
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        @using (Html.BeginForm("SnimiZahtjevZaBrisanjeBankovnogRacuna", "Zahtjev"))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="from-group">
+                                @Html.Label("Račun: ")
+                                @Html.DropDownListFor(Model => Model.RacunId, Model.racuni, new { @class = "form-control" })
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["ZahtjevPoslan"] == null) {
+                                    @Html.Label("Opis: ")
+                                    @Html.TextAreaFor(Model => Model.Opis, new { @class = "form-control", @cols = "60", @rows = "8", style = "resize:none" })
+                                    @Html.ValidationMessageFor(Model => Model.Opis, "", new { @class = "text-danger" })
+                                }
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["ZahtjevPoslan"] != null) {
+                                    @Html.Label("Opis: ")
+                                    @Html.TextBoxFor(Model => Model.Opis, new { @class = "form-control", @readonly = "readonly" })
+                                    @Html.ValidationMessageFor(Model => Model.Opis)
+                                }
+                            </div>
+
+                            @Html.HiddenFor(Model => Model.DatumKreiranja)
+                            @Html.HiddenFor(Model => Model.KlijentId)
+                            @Html.HiddenFor(Model => Model.TipZahtjevaId)
+
+                            <div class="form-group">
+                                @if (ViewData["ZahtjevPoslan"] == null) {
+                                    <input type="submit" value="Pošalji" class="btn btn-primary btn-sm" />
+                                }
+                            </div>
+
+                            <div class="form-group">
+                                @if (ViewData["ZahtjevPoslan"] != null) {
+                                    <a href="/ModulKorisnik/Zahtjev/ZahtjevZaBrisanjeBankovnogRacuna" class="btn btn-primary btn-sm">Novi zahtjev</a>
+                                }
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["ZahtjevPoslan"] != null) {
+                                    <label class="alert alert-success"> @ViewData["ZahtjevPoslan"] </label>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

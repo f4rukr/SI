@@ -1,0 +1,84 @@
+﻿@using OnlineBanking.Web.Areas.ModulRadnik.ViewModels
+@{
+// Layout = null;
+}
+@model OdgovorNaPorukuVM
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Slanje poruke</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                Odgovor
+            </div>
+
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        @using (Html.BeginForm("SnimiOdgovorNaPoruku", "Poruke"))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="form-group">
+                                @Html.Label("Primaoc: ")
+                                @Html.TextBoxFor(Model => Model.ImePrezime , new { @class = "form-control", style = "width:100%", @readonly = "readonly" })                              
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label("Naslov: ")
+                                @Html.TextBoxFor(Model => Model.Naslov, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["PoslanaPoruka"] == null)
+                                {
+                                    <div class="form-group">
+                                        @Html.Label("Sadržaj: ")
+                                        @Html.TextAreaFor(Model => Model.Sadrzaj, new { @class = "form-control", @cols = "60", @rows = "8", style = "resize:none"})
+                                        @Html.ValidationMessageFor(Model => Model.Sadrzaj, "",new {@class = "text-danger" })
+                                     </div>
+                                }
+                            </div>
+                            <div class="form-group">
+                                @if (ViewData["PoslanaPoruka"] != null)
+                                {
+                                    <div class="form-group">
+                                        @Html.Label("Sadržaj: ")
+                                        @Html.TextAreaFor(Model => Model.Sadrzaj, new { @class = "form-control", @cols = "60", @rows = "8", style = "resize:none", @readonly = "readonly" })
+                                        
+                                    </div>
+                                }
+                            </div>
+                            @Html.HiddenFor(Model => Model.KlijentId)
+                            @Html.HiddenFor(Model => Model.RadnikId)
+                            @Html.HiddenFor(Model => Model.PorukaId)
+                            <div class="col-md-12 col-md-offset-2">
+                                @if (ViewData["PoslanaPoruka"] == null)
+                                {
+                                    <input type="submit" value="Pošalji" class="btn btn-primary btn-sm" />
+                                }
+                            </div>
+                            <div class="col-md-12 col-md-offset-1">
+                                @if (ViewData["PoslanaPoruka"] != null)
+                                {
+                                    <a href="/ModulRadnik/Poruke/PrikaziPrimljenePoruke" class="btn btn-primary btn-sm">Primljene poruke</a>
+                                }
+                            </div>
+                            <div class="col-md-12 col-md-offset-0">
+                                <br />
+                                @if (ViewData["PoslanaPoruka"] != null) {
+                                    <label class="alert alert-success"> @ViewData["PoslanaPoruka"] </label>
+                                }
+
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

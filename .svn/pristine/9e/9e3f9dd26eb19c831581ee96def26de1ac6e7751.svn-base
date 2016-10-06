@@ -1,0 +1,90 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+
+@{
+//Layout = null;
+}
+@model NovaPorukaVM
+<div class="porukaDiv">
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Nova poruka</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                Nova poruka
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        @using (Ajax.BeginForm("SnimiPoruku", "Poruke", new AjaxOptions { UpdateTargetId = "porukaDiv", OnSuccess = "successMessage" }, new { @class = "form", role = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(Model => Model.DatumVrijeme)
+                            @Html.HiddenFor(Model => Model.Odgovorena)
+                            @Html.HiddenFor(Model => Model.KlijentId)
+
+                            <div class="form-group">
+                                @Html.Label("Primaoc: ")
+                                @Html.TextBox("FIT Banka", "FIT Banka", new { @class = "form-control", style = "width:100%", @readonly = "readonly" })
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Naslov: ")
+                                @Html.TextBoxFor(Model => Model.Naslov, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(Model => Model.Naslov, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Sadržaj: ")
+                                @Html.TextAreaFor(Model => Model.Sadrzaj, new { @class = "form-control", @cols = "60", @rows = "8", style = "resize:none" })
+                                @Html.ValidationMessageFor(Model => Model.Sadrzaj, "", new { @class = "text-danger" })
+                            </div>
+
+                            <input type="button" class="btn btn-primary" value="Posalji" data-toggle="modal" data-target="#myModal" />
+                        }
+                        <br />
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="hideMessage()"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel"><i class="fa fa-info-circle"> </i>Info</h4>
+            </div>
+            <div class="modal-body">
+                <p>Uspješno ste poslali poruku.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="hideMessage()">Zatvori</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script type="text/javascript">
+
+    function successMessage() {
+        if (data.success) {
+            $("#myModal").modal();
+        }
+
+    }
+    function hideMessage(data) {
+        $('#myModal').modal('hide');
+        location.reload();
+    }
+</script>
+

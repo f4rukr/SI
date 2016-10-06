@@ -1,0 +1,60 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+@{
+    Layout = null;
+}
+@model StanjeRacunaDetaljiVM
+<title>StanjeRacunaDetalji</title>
+<div class="row">
+    <ul class="nav nav-pills" id="tools">
+        <li role="presentation" class="active">@Html.ActionLink("Export u Word", "GenerateWord", new { BrojRacuna = Model.BrojRacuna })</li>
+        <li role="presentation" class="active">@Html.ActionLink("Export u PDF", "GeneratePDF", new { BrojRacuna = Model.BrojRacuna })</li>
+        <li role="presentation" class="active">@Html.ActionLink("Export u Excel", "GenerateExcel", new { BrojRacuna = Model.BrojRacuna })</li>
+        <li role="presentation" class="active">@Html.ActionLink("Export u XML", "GenerateXML", new { BrojRacuna = Model.BrojRacuna })</li>
+    </ul>
+</div>
+
+
+<div class="row" style="margin-top: 10px">
+
+
+    <!-- Info table -->
+    <!-- Info table -->
+    <div class="table-info">
+        <div class="table-header">
+            <div class="table-caption">
+                <b> Klijent: @Model.ImePrezime</b>
+            </div>
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Banka</th>
+                    <th>Vlasnik računa</th>
+                    <th>Vrsta računa</th>
+                    <th>Broj računa</th>
+                    <th>Datum otvaranja</th>
+                    <th>Stanje računa</th>
+                    <th>Limit</th>
+                    <th>Valuta</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>FIT Banka</td>
+                    <td>@Model.ImePrezime</td>
+                    <td>@Model.TipRacunaEnum</td>
+                    <td>@Model.BrojRacuna</td>
+                    <td>@Model.DatumOtvaranja</td>
+                    <td>@Model.Stanje</td>
+                    <td>@Model.Limit</td>
+                    <td>@Model.Valuta</td>
+
+                </tr>
+            </tbody>
+        </table>
+        <div class="table-footer">
+            Detaljan prikaz računa
+        </div>
+    </div>
+    <!-- / Info table -->
+</div>

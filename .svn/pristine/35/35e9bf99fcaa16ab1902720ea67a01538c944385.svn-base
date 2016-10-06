@@ -1,0 +1,80 @@
+﻿@using OnlineBanking.Web.Areas.ModulRadnik.ViewModels
+@using OnlineBanking.Data.Models
+@using OnlineBanking.Web.Helper
+@{
+//Layout = null;
+}
+@model PrikaziZahtjevVM
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Zahtjev za dodavanje računa</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                Detalji zahtjeva
+            </div>
+
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            @Html.Label("Klijent: ")
+                            @Html.TextBoxFor(model => model.KlijentImePrezime, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("JMBG: ")
+                            @Html.TextBoxFor(model => model.JMBG, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Vrijeme kreiranja zahtjeva: ")
+                            @Html.TextBoxFor(model => model.DatumKreiranja, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Tip računa: ")
+                            @Html.TextBoxFor(model => model.TipRacunaEnum, new { @class = "form-control", @readonly = "readonly" })
+                        </div><div class="form-group">
+                            @Html.Label("Valuta: ")
+                            @Html.TextBoxFor(model => model.TipValute, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Opis: ")
+                            @Html.TextAreaFor(Model => Model.Opis, new { @class = "form-control", @readonly = "readonly", style = "resize:none", @cols = "60", @rows = "8" })
+                        </div>
+                        @Html.HiddenFor(Model => Model.ZahtjevId)
+                        <div class="form-group">
+                            @if (ViewData["OdbijenZahtjev"] == null)
+                            {
+                                @Html.ActionLink("Procesiraj", "ProcesirajZahtjev", new { ZahtjevId = Model.ZahtjevId}, new { @class = "btn btn-primary btn-sm" }) @Html.Raw("&nbsp")  @Html.ActionLink("Odbij", "OdbijZahtjev", new { ZahtjevId = Model.ZahtjevId}, new { @class = "btn btn-danger btn-sm" })
+                            }
+                        </div>
+                        
+                        <div class="col-md-12 col-md-offset-0">
+                            <br />
+                            @if (ViewData["OdbijenZahtjev"] != null)
+                            {
+
+                                <a href="/ModulRadnik/Zahtjev/ZahtjeviDodavanjeBankovniRacuni" class="btn btn-primary btn-sm">Zahtjevi za nove bankovne račun</a>
+                            }
+
+                        </div>   
+                        <div class="col-md-12 col-md-offset-0">
+                            <br />
+                            @if (ViewData["OdbijenZahtjev"] != null)
+                            {
+
+                                <label class="alert alert-success"> @ViewData["OdbijenZahtjev"] </label>
+                            }
+
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

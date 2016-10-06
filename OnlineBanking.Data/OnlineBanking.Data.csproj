@@ -1,0 +1,443 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{009D5929-FE2B-499F-96D7-0E800178F2B6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OnlineBanking.Data</RootNamespace>
+    <AssemblyName>OnlineBanking.Data</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AjaxMin, Version=5.14.5506.26196, Culture=neutral, PublicKeyToken=21ef50ce11b5d80f, processorArchitecture=MSIL">
+      <HintPath>..\packages\AjaxMin.5.14.5506.26202\lib\net40\AjaxMin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MVC Foolproof Validation, Version=0.9.4517.16477, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\foolproof.0.9.4517\lib\MVC Foolproof Validation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="DAL\DL_Context.cs" />
+    <Compile Include="Migrations\201511200908021_InitialCreate.cs" />
+    <Compile Include="Migrations\201511200908021_InitialCreate.Designer.cs">
+      <DependentUpon>201511200908021_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512212039212_boolProcitanaPoruka.cs" />
+    <Compile Include="Migrations\201512212039212_boolProcitanaPoruka.Designer.cs">
+      <DependentUpon>201512212039212_boolProcitanaPoruka.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512221822401_IsActiveAtributKorisnik.cs" />
+    <Compile Include="Migrations\201512221822401_IsActiveAtributKorisnik.Designer.cs">
+      <DependentUpon>201512221822401_IsActiveAtributKorisnik.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512222053462_OdgovorenaPorukaBoolAtribut.cs" />
+    <Compile Include="Migrations\201512222053462_OdgovorenaPorukaBoolAtribut.Designer.cs">
+      <DependentUpon>201512222053462_OdgovorenaPorukaBoolAtribut.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512251125245_DodavanjeVirtualFK.cs" />
+    <Compile Include="Migrations\201512251125245_DodavanjeVirtualFK.Designer.cs">
+      <DependentUpon>201512251125245_DodavanjeVirtualFK.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512251525250_SlikePath.cs" />
+    <Compile Include="Migrations\201512251525250_SlikePath.Designer.cs">
+      <DependentUpon>201512251525250_SlikePath.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512272140487_DatumRodjenjaString.cs" />
+    <Compile Include="Migrations\201512272140487_DatumRodjenjaString.Designer.cs">
+      <DependentUpon>201512272140487_DatumRodjenjaString.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512272147176_BrojUliceString.cs" />
+    <Compile Include="Migrations\201512272147176_BrojUliceString.Designer.cs">
+      <DependentUpon>201512272147176_BrojUliceString.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512272312500_ZadnjiUpdate.cs" />
+    <Compile Include="Migrations\201512272312500_ZadnjiUpdate.Designer.cs">
+      <DependentUpon>201512272312500_ZadnjiUpdate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512291330171_NazivTabeleZahtjev.cs" />
+    <Compile Include="Migrations\201512291330171_NazivTabeleZahtjev.Designer.cs">
+      <DependentUpon>201512291330171_NazivTabeleZahtjev.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512291429341_ZahtjevPromjenaDatumKreiranja.cs" />
+    <Compile Include="Migrations\201512291429341_ZahtjevPromjenaDatumKreiranja.Designer.cs">
+      <DependentUpon>201512291429341_ZahtjevPromjenaDatumKreiranja.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512291456468_RemoveVirtual.cs" />
+    <Compile Include="Migrations\201512291456468_RemoveVirtual.Designer.cs">
+      <DependentUpon>201512291456468_RemoveVirtual.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512291732314_EnumeracijaTipRacuna.cs" />
+    <Compile Include="Migrations\201512291732314_EnumeracijaTipRacuna.Designer.cs">
+      <DependentUpon>201512291732314_EnumeracijaTipRacuna.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512291844507_ZahtjevNoviBankovniRacun.cs" />
+    <Compile Include="Migrations\201512291844507_ZahtjevNoviBankovniRacun.Designer.cs">
+      <DependentUpon>201512291844507_ZahtjevNoviBankovniRacun.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512292131593_PorukaDateTimeString.cs" />
+    <Compile Include="Migrations\201512292131593_PorukaDateTimeString.Designer.cs">
+      <DependentUpon>201512292131593_PorukaDateTimeString.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601112029122_KlijentIsDeleted.cs" />
+    <Compile Include="Migrations\201601112029122_KlijentIsDeleted.Designer.cs">
+      <DependentUpon>201601112029122_KlijentIsDeleted.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601112343557_ZahtjevRacunID.cs" />
+    <Compile Include="Migrations\201601112343557_ZahtjevRacunID.Designer.cs">
+      <DependentUpon>201601112343557_ZahtjevRacunID.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601131902190_LogDateTimeString.cs" />
+    <Compile Include="Migrations\201601131902190_LogDateTimeString.Designer.cs">
+      <DependentUpon>201601131902190_LogDateTimeString.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601140010544_izbacioSalt.cs" />
+    <Compile Include="Migrations\201601140010544_izbacioSalt.Designer.cs">
+      <DependentUpon>201601140010544_izbacioSalt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601140016146_virtuals.cs" />
+    <Compile Include="Migrations\201601140016146_virtuals.Designer.cs">
+      <DependentUpon>201601140016146_virtuals.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601141404586_dodavanjeVarijableBrojRacuna.cs" />
+    <Compile Include="Migrations\201601141404586_dodavanjeVarijableBrojRacuna.Designer.cs">
+      <DependentUpon>201601141404586_dodavanjeVarijableBrojRacuna.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601141507476_brojRacuna.cs" />
+    <Compile Include="Migrations\201601141507476_brojRacuna.Designer.cs">
+      <DependentUpon>201601141507476_brojRacuna.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601151928205_PromjenaDatumaUUplatnici.cs" />
+    <Compile Include="Migrations\201601151928205_PromjenaDatumaUUplatnici.Designer.cs">
+      <DependentUpon>201601151928205_PromjenaDatumaUUplatnici.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601152102044_PromjenaEnumeracijeKodUplatnice.cs" />
+    <Compile Include="Migrations\201601152102044_PromjenaEnumeracijeKodUplatnice.Designer.cs">
+      <DependentUpon>201601152102044_PromjenaEnumeracijeKodUplatnice.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601162038357_UplatniceTabela.cs" />
+    <Compile Include="Migrations\201601162038357_UplatniceTabela.Designer.cs">
+      <DependentUpon>201601162038357_UplatniceTabela.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601162139328_PredlozakBrojRacuna.cs" />
+    <Compile Include="Migrations\201601162139328_PredlozakBrojRacuna.Designer.cs">
+      <DependentUpon>201601162139328_PredlozakBrojRacuna.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601162213217_PredlozakBrojRacuna1.cs" />
+    <Compile Include="Migrations\201601162213217_PredlozakBrojRacuna1.Designer.cs">
+      <DependentUpon>201601162213217_PredlozakBrojRacuna1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601162316106_m.cs" />
+    <Compile Include="Migrations\201601162316106_m.Designer.cs">
+      <DependentUpon>201601162316106_m.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601162336163_KlijentIdPredlosci.cs" />
+    <Compile Include="Migrations\201601162336163_KlijentIdPredlosci.Designer.cs">
+      <DependentUpon>201601162336163_KlijentIdPredlosci.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601172329475_PorukaProcitana.cs" />
+    <Compile Include="Migrations\201601172329475_PorukaProcitana.Designer.cs">
+      <DependentUpon>201601172329475_PorukaProcitana.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601180048048_notifikacije.cs" />
+    <Compile Include="Migrations\201601180048048_notifikacije.Designer.cs">
+      <DependentUpon>201601180048048_notifikacije.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601181215407_notifikacijaUspjeh.cs" />
+    <Compile Include="Migrations\201601181215407_notifikacijaUspjeh.Designer.cs">
+      <DependentUpon>201601181215407_notifikacijaUspjeh.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601181313001_zadnja.cs" />
+    <Compile Include="Migrations\201601181313001_zadnja.Designer.cs">
+      <DependentUpon>201601181313001_zadnja.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601181905560_ZahtjevIdNotif.cs" />
+    <Compile Include="Migrations\201601181905560_ZahtjevIdNotif.Designer.cs">
+      <DependentUpon>201601181905560_ZahtjevIdNotif.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601181935476_NotifikacijeZahtjevId.cs" />
+    <Compile Include="Migrations\201601181935476_NotifikacijeZahtjevId.Designer.cs">
+      <DependentUpon>201601181935476_NotifikacijeZahtjevId.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601191658331_predlozak.cs" />
+    <Compile Include="Migrations\201601191658331_predlozak.Designer.cs">
+      <DependentUpon>201601191658331_predlozak.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601191827545_RacunPosiljaocaUplatnica.cs" />
+    <Compile Include="Migrations\201601191827545_RacunPosiljaocaUplatnica.Designer.cs">
+      <DependentUpon>201601191827545_RacunPosiljaocaUplatnica.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601191902577_UplatnicaOpcina.cs" />
+    <Compile Include="Migrations\201601191902577_UplatnicaOpcina.Designer.cs">
+      <DependentUpon>201601191902577_UplatnicaOpcina.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601192334020_ZahtjevTipValute.cs" />
+    <Compile Include="Migrations\201601192334020_ZahtjevTipValute.Designer.cs">
+      <DependentUpon>201601192334020_ZahtjevTipValute.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601200224453_IsAtiveGone.cs" />
+    <Compile Include="Migrations\201601200224453_IsAtiveGone.Designer.cs">
+      <DependentUpon>201601200224453_IsAtiveGone.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601201656248_brojOpstine.cs" />
+    <Compile Include="Migrations\201601201656248_brojOpstine.Designer.cs">
+      <DependentUpon>201601201656248_brojOpstine.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601201736091_VrstaPredloska.cs" />
+    <Compile Include="Migrations\201601201736091_VrstaPredloska.Designer.cs">
+      <DependentUpon>201601201736091_VrstaPredloska.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601201741105_predlozakIsdeleted.cs" />
+    <Compile Include="Migrations\201601201741105_predlozakIsdeleted.Designer.cs">
+      <DependentUpon>201601201741105_predlozakIsdeleted.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601241614541_Stednja.cs" />
+    <Compile Include="Migrations\201601241614541_Stednja.Designer.cs">
+      <DependentUpon>201601241614541_Stednja.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601241721553_isDeletedStednje.cs" />
+    <Compile Include="Migrations\201601241721553_isDeletedStednje.Designer.cs">
+      <DependentUpon>201601241721553_isDeletedStednje.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601241734042_StednjaDatumKreiranja.cs" />
+    <Compile Include="Migrations\201601241734042_StednjaDatumKreiranja.Designer.cs">
+      <DependentUpon>201601241734042_StednjaDatumKreiranja.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601241744207_migracijaStednja.cs" />
+    <Compile Include="Migrations\201601241744207_migracijaStednja.Designer.cs">
+      <DependentUpon>201601241744207_migracijaStednja.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201601241745093_IsDeletedStednjaRadiSad.cs" />
+    <Compile Include="Migrations\201601241745093_IsDeletedStednjaRadiSad.Designer.cs">
+      <DependentUpon>201601241745093_IsDeletedStednjaRadiSad.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\BaseEntity.cs" />
+    <Compile Include="Models\Drzava.cs" />
+    <Compile Include="Models\Klijent.cs" />
+    <Compile Include="Models\LogPrijava.cs" />
+    <Compile Include="Models\Notifikacija.cs" />
+    <Compile Include="Models\Obavijest.cs" />
+    <Compile Include="Models\Opstina.cs" />
+    <Compile Include="Models\Poruka.cs" />
+    <Compile Include="Models\Predlozak.cs" />
+    <Compile Include="Models\Racun.cs" />
+    <Compile Include="Models\Radnik.cs" />
+    <Compile Include="Models\Stednja.cs" />
+    <Compile Include="Models\TipZahtjeva.cs" />
+    <Compile Include="Models\Transakcija.cs" />
+    <Compile Include="Models\Uplatnica.cs" />
+    <Compile Include="Models\Zahtjev.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201511200908021_InitialCreate.resx">
+      <DependentUpon>201511200908021_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512212039212_boolProcitanaPoruka.resx">
+      <DependentUpon>201512212039212_boolProcitanaPoruka.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512221822401_IsActiveAtributKorisnik.resx">
+      <DependentUpon>201512221822401_IsActiveAtributKorisnik.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512222053462_OdgovorenaPorukaBoolAtribut.resx">
+      <DependentUpon>201512222053462_OdgovorenaPorukaBoolAtribut.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512251125245_DodavanjeVirtualFK.resx">
+      <DependentUpon>201512251125245_DodavanjeVirtualFK.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512251525250_SlikePath.resx">
+      <DependentUpon>201512251525250_SlikePath.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512272140487_DatumRodjenjaString.resx">
+      <DependentUpon>201512272140487_DatumRodjenjaString.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512272147176_BrojUliceString.resx">
+      <DependentUpon>201512272147176_BrojUliceString.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512272312500_ZadnjiUpdate.resx">
+      <DependentUpon>201512272312500_ZadnjiUpdate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512291330171_NazivTabeleZahtjev.resx">
+      <DependentUpon>201512291330171_NazivTabeleZahtjev.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512291429341_ZahtjevPromjenaDatumKreiranja.resx">
+      <DependentUpon>201512291429341_ZahtjevPromjenaDatumKreiranja.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512291456468_RemoveVirtual.resx">
+      <DependentUpon>201512291456468_RemoveVirtual.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512291732314_EnumeracijaTipRacuna.resx">
+      <DependentUpon>201512291732314_EnumeracijaTipRacuna.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512291844507_ZahtjevNoviBankovniRacun.resx">
+      <DependentUpon>201512291844507_ZahtjevNoviBankovniRacun.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512292131593_PorukaDateTimeString.resx">
+      <DependentUpon>201512292131593_PorukaDateTimeString.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601112029122_KlijentIsDeleted.resx">
+      <DependentUpon>201601112029122_KlijentIsDeleted.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601112343557_ZahtjevRacunID.resx">
+      <DependentUpon>201601112343557_ZahtjevRacunID.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601131902190_LogDateTimeString.resx">
+      <DependentUpon>201601131902190_LogDateTimeString.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601140010544_izbacioSalt.resx">
+      <DependentUpon>201601140010544_izbacioSalt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601140016146_virtuals.resx">
+      <DependentUpon>201601140016146_virtuals.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601141404586_dodavanjeVarijableBrojRacuna.resx">
+      <DependentUpon>201601141404586_dodavanjeVarijableBrojRacuna.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601141507476_brojRacuna.resx">
+      <DependentUpon>201601141507476_brojRacuna.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601151928205_PromjenaDatumaUUplatnici.resx">
+      <DependentUpon>201601151928205_PromjenaDatumaUUplatnici.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601152102044_PromjenaEnumeracijeKodUplatnice.resx">
+      <DependentUpon>201601152102044_PromjenaEnumeracijeKodUplatnice.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601162038357_UplatniceTabela.resx">
+      <DependentUpon>201601162038357_UplatniceTabela.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601162139328_PredlozakBrojRacuna.resx">
+      <DependentUpon>201601162139328_PredlozakBrojRacuna.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601162213217_PredlozakBrojRacuna1.resx">
+      <DependentUpon>201601162213217_PredlozakBrojRacuna1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601162316106_m.resx">
+      <DependentUpon>201601162316106_m.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601162336163_KlijentIdPredlosci.resx">
+      <DependentUpon>201601162336163_KlijentIdPredlosci.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601172329475_PorukaProcitana.resx">
+      <DependentUpon>201601172329475_PorukaProcitana.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601180048048_notifikacije.resx">
+      <DependentUpon>201601180048048_notifikacije.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601181215407_notifikacijaUspjeh.resx">
+      <DependentUpon>201601181215407_notifikacijaUspjeh.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601181313001_zadnja.resx">
+      <DependentUpon>201601181313001_zadnja.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601181905560_ZahtjevIdNotif.resx">
+      <DependentUpon>201601181905560_ZahtjevIdNotif.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601181935476_NotifikacijeZahtjevId.resx">
+      <DependentUpon>201601181935476_NotifikacijeZahtjevId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601191658331_predlozak.resx">
+      <DependentUpon>201601191658331_predlozak.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601191827545_RacunPosiljaocaUplatnica.resx">
+      <DependentUpon>201601191827545_RacunPosiljaocaUplatnica.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601191902577_UplatnicaOpcina.resx">
+      <DependentUpon>201601191902577_UplatnicaOpcina.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601192334020_ZahtjevTipValute.resx">
+      <DependentUpon>201601192334020_ZahtjevTipValute.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601200224453_IsAtiveGone.resx">
+      <DependentUpon>201601200224453_IsAtiveGone.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601201656248_brojOpstine.resx">
+      <DependentUpon>201601201656248_brojOpstine.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601201736091_VrstaPredloska.resx">
+      <DependentUpon>201601201736091_VrstaPredloska.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601201741105_predlozakIsdeleted.resx">
+      <DependentUpon>201601201741105_predlozakIsdeleted.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601241614541_Stednja.resx">
+      <DependentUpon>201601241614541_Stednja.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601241721553_isDeletedStednje.resx">
+      <DependentUpon>201601241721553_isDeletedStednje.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601241734042_StednjaDatumKreiranja.resx">
+      <DependentUpon>201601241734042_StednjaDatumKreiranja.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601241744207_migracijaStednja.resx">
+      <DependentUpon>201601241744207_migracijaStednja.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201601241745093_IsDeletedStednjaRadiSad.resx">
+      <DependentUpon>201601241745093_IsDeletedStednjaRadiSad.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scripts\jquery-1.8.0.intellisense.js" />
+    <Content Include="Scripts\jquery-1.8.0.js" />
+    <Content Include="Scripts\jquery-1.8.0.min.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
+    <Content Include="Scripts\mvcfoolproof.unobtrusive.min.js" />
+    <Content Include="Scripts\MvcFoolproofJQueryValidation.min.js" />
+    <Content Include="Scripts\MvcFoolproofValidation.min.js" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

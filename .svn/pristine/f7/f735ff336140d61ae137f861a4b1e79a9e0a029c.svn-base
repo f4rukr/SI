@@ -1,0 +1,71 @@
+﻿@using OnlineBanking.Data.Models
+@{
+//Layout = null;
+}
+@model List<Klijent>
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Korisnički računi</h3>
+    </div>
+</div>
+
+<div class="table-info">
+    <div id="datatable-wrapper" class="table-caption">
+        <table id="datatable" cellpadding="0" cellspacing="0" border="0" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Ime i prezime</th>
+                    <th>Korisničko ime</th>
+                    <th>JMBG</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Klijent item in Model)
+                {
+                    <tr>
+                        <td>@item.Ime @item.Prezime</td>
+                        <td>@item.Username</td>
+                        <td>@item.JMBG</td>
+                        <td>
+                            @Ajax.ActionLink("Lični podaci", "EditKlijentProfil", "Radnik", new { KlijentId = item.Id },
+                                new AjaxOptions() { UpdateTargetId = "licniPodaciDiv", OnSuccess = "otvoriDialog();" }, new { @class = "btn btn-primary btn-sm" })
+
+                            @Html.ActionLink("Bankovni računi", "StanjeRacuna", "Radnik", new { KlijentId = item.Id }, new { @class = "btn btn-info btn-sm" })
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="licniPodaciDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Jquery Data Tables-->
+<script>
+    init.push(function () {
+        jQuery('#datatable').DataTable();
+        jQuery('#datatable-wrapper .table-caption').text('Lista korisnika');
+        jQuery('#datatable-wrapper .dataTables_filter input').attr('placeholder', 'Pretraga');
+    });
+</script>
+<!-- / Javascript -->
+
+<!--JQUERY za MODAL-->
+<script type="text/javascript">
+        function otvoriDialog() {
+            $('#myModal').modal();
+        }
+</script>
+

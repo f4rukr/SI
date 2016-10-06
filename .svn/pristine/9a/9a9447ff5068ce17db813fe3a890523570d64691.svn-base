@@ -1,0 +1,282 @@
+﻿using OnlineBanking.Data.DAL;
+using OnlineBanking.Data.Models;
+using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels;
+using OnlineBanking.Web.Helper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Entity;
+
+namespace OnlineBanking.Web.Areas.ModulKorisnik.Controllers
+{
+    public class StednjaController : Controller
+    {
+        DL_Context db = new DL_Context();
+        // GET: ModulKorisnik/Stednja
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        public ActionResult NovaStednja()
+        {
+            NovaStednjaVM model = new NovaStednjaVM();
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            model.KlijentImePrezime = db.Klijenti.Where(x => x.Id == KlijentId).Select(x => x.Ime + " " + x.Prezime).FirstOrDefault();
+            model.KlijentAdresa = db.Klijenti.Include(x => x.Opstina).Where(x => x.Id == KlijentId).Select(x => x.Ulica + " " + x.BrojUlice + ", " + x.Opstina.Naziv).FirstOrDefault();
+
+            model.racuni = getRacuni();
+            model.mjeseciOrocenja = getMjeseciOrocenja();
+            return View(model);
+        }
+
+        public ActionResult SnimiNovuStednju(NovaStednjaVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.KlijentImePrezime = db.Klijenti.Where(x => x.Id == KlijentId).Select(x => x.Ime + " " + x.Prezime).FirstOrDefault();
+                model.KlijentAdresa = db.Klijenti.Include(x => x.Opstina).Where(x => x.Id == KlijentId).Select(x => x.Ulica + " " + x.BrojUlice + ", " + x.Opstina.Naziv).FirstOrDefault();
+                model.racuni = getRacuni();
+                model.mjeseciOrocenja = getMjeseciOrocenja();
+                return View("NovaStednja", model);
+            }
+            double IznosNaRacunu = db.Racuni.Where(x => x.Id == model.RacunId).Select(x => x.Stanje).FirstOrDefault();
+            if (IznosNaRacunu < model.IznosOrocenja)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.KlijentImePrezime = db.Klijenti.Where(x => x.Id == KlijentId).Select(x => x.Ime + " " + x.Prezime).FirstOrDefault();
+                model.KlijentAdresa = db.Klijenti.Include(x => x.Opstina).Where(x => x.Id == KlijentId).Select(x => x.Ulica + " " + x.BrojUlice + ", " + x.Opstina.Naziv).FirstOrDefault();
+                ViewData["Iznos"] = "-";
+                model.racuni = getRacuni();
+                model.mjeseciOrocenja = getMjeseciOrocenja();
+                return View("NovaStednja", model);
+            }
+            if (model.IznosOrocenja < 100)
+            {
+                int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.KlijentImePrezime = db.Klijenti.Where(x => x.Id == KlijentId).Select(x => x.Ime + " " + x.Prezime).FirstOrDefault();
+                model.KlijentAdresa = db.Klijenti.Include(x => x.Opstina).Where(x => x.Id == KlijentId).Select(x => x.Ulica + " " + x.BrojUlice + ", " + x.Opstina.Naziv).FirstOrDefault();
+                string valuta = db.Racuni.Where(x => x.Id == model.RacunId).Select(x => x.Valuta).FirstOrDefault();
+                ViewData["Minimum"] = "Minimalan iznos za oročenje novca je 100" + valuta + "!";
+                model.racuni = getRacuni();
+                model.mjeseciOrocenja = getMjeseciOrocenja();
+                return View("NovaStednja", model);
+            }
+            Stednja stednja = new Stednja();
+            stednja.IznosOrocenja = model.IznosOrocenja;
+            stednja.KrajStednje = DateTime.Now.AddMonths(model.MjesecOrocenjaId);
+            stednja.KrajStednje = stednja.KrajStednje.Date;
+            stednja.RacunId = model.RacunId;
+
+            switch (model.MjesecOrocenjaId)
+            {
+                case 1:
+                    {
+                        stednja.KamatnaStopa = "0,20 %";
+                        stednja.KoeficijentStopa = 0.002;
+                        break;
+                    }
+                case 2:
+                    {
+                        stednja.KamatnaStopa = "0,25 %";
+                        stednja.KoeficijentStopa = 0.0025;
+                        break;
+                    }
+                case 3:
+                    {
+                        stednja.KamatnaStopa = "0,30 %";
+                        stednja.KoeficijentStopa = 0.003;
+                        break;
+                    }
+                case 6:
+                    {
+                        stednja.KamatnaStopa = "1,40 %";
+                        stednja.KoeficijentStopa = 0.014;
+                        break;
+                    }
+
+                case 12:
+                    {
+                        stednja.KamatnaStopa = "2,70 %";
+                        stednja.KoeficijentStopa = 0.027;
+                        break;
+                    }
+                case 18:
+                    {
+                        stednja.KamatnaStopa = "3,20 %";
+                        stednja.KoeficijentStopa = 0.032;
+                        break;
+                    }
+                case 24:
+                    {
+                        stednja.KamatnaStopa = "3,40 %";
+                        stednja.KoeficijentStopa = 0.034;
+                        break;
+                    }
+                case 36:
+                    {
+                        stednja.KamatnaStopa = "3,60 %";
+                        stednja.KoeficijentStopa = 0.036;
+                        break;
+                    }
+                case 48:
+                    {
+                        stednja.KamatnaStopa = "3,80 %";
+                        stednja.KoeficijentStopa = 0.038;
+                        break;
+                    }
+
+                default:
+                    break;
+            }
+            stednja.IznosNaGlavnicu = model.IznosOrocenja * stednja.KoeficijentStopa;
+            stednja.DatumKreiranja = DateTime.Now.ToString();
+            stednja.KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Racun racun = db.Racuni.Find(model.RacunId);
+            racun.Stanje -= model.IznosOrocenja;
+            db.Stednje.Add(stednja);
+            db.SaveChanges();
+            ViewData["Stednja"] = "Štednja je uspješno kreirana!";
+            model.racuni = getRacuni();
+            model.mjeseciOrocenja = getMjeseciOrocenja();
+            
+            return View("NovaStednja", model);
+        }
+
+        public ActionResult MojeStednje()
+        {
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            List<Stednja> stednje = db.Stednje.Where(x => x.KlijentId == KlijentId && x.IsDeleted == false).ToList();
+            return View(stednje);
+        }
+
+        public ActionResult RazrocenjeStednje(int StednjaId)
+        {
+            Stednja stednja = db.Stednje.Find(StednjaId);
+            stednja.IsDeleted = true;
+            Racun racun = db.Racuni.Find(stednja.RacunId);
+            racun.Stanje += stednja.IznosOrocenja;
+            db.SaveChanges();
+            ViewData["Razrocenje"] = "Uspješno ste razročili štednju na vašem bankovnom računu. Provjerite stanje vašeg -" + racun.TipRacuna + "- računa.";
+            return PartialView();
+        }
+
+        public ActionResult Kalkulator()
+        {
+            KalkulatorVM model = new KalkulatorVM();
+            model.mjeseciOrocenja = getMjeseciOrocenja();
+            return View(model);
+        }
+
+        public ActionResult IzracunajKalkulator(KalkulatorVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.mjeseciOrocenja = getMjeseciOrocenja();
+                ViewData["IzracunGreska"] = "Niste unijeli validne podatke!";
+                return View("IzracunajKalkulator", model);
+            }
+            switch (model.MjesecOrocenjaId)
+            {
+                case 1:
+                    {
+                        model.KamatnaStopa = "0,20 %";
+                        model.KoeficijentStopa = 0.002;
+                        break;
+                    }
+                case 2:
+                    {
+                        model.KamatnaStopa = "0,25 %";
+                        model.KoeficijentStopa = 0.0025;
+                        break;
+                    }
+                case 3:
+                    {
+                        model.KamatnaStopa = "0,30 %";
+                        model.KoeficijentStopa = 0.003;
+                        break;
+                    }
+                case 6:
+                    {
+                        model.KamatnaStopa = "1,40 %";
+                        model.KoeficijentStopa = 0.014;
+                        break;
+                    }
+
+                case 12:
+                    {
+                        model.KamatnaStopa = "2,70 %";
+                        model.KoeficijentStopa = 0.027;
+                        break;
+                    }
+                case 18:
+                    {
+                        model.KamatnaStopa = "3,20 %";
+                        model.KoeficijentStopa = 0.032;
+                        break;
+                    }
+                case 24:
+                    {
+                        model.KamatnaStopa = "3,40 %";
+                        model.KoeficijentStopa = 0.034;
+                        break;
+                    }
+                case 36:
+                    {
+                        model.KamatnaStopa = "3,60 %";
+                        model.KoeficijentStopa = 0.036;
+                        break;
+                    }
+                case 48:
+                    {
+                        model.KamatnaStopa = "3,80 %";
+                        model.KoeficijentStopa = 0.038;
+                        break;
+                    }
+
+                default:
+                    break;
+            }
+
+            model.IznosOrocenja = model.IznosOrocenja;
+            model.UkupnoKamata = model.IznosOrocenja * model.KoeficijentStopa;
+            model.Saldo = model.UkupnoKamata + model.IznosOrocenja;
+            return PartialView(model);
+        }
+        private List<SelectListItem> getRacuni()
+        {
+            //List<Racun> r =  db.Racuni.Where(x => x.KlijentId == KlijentId && x.IsDeleted == false).ToList();
+            //List<SelectListItem> racuni = new List<SelectListItem>();
+            //racuni.Add(new SelectListItem { Value = "0", Text = "-Odaberite račun za štednju-" });
+            //racuni.AddRange(r.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = (TipRacuna)x.TipRacuna + " - " + x.BrojRacuna }));
+            //return racuni;
+                
+
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            return db.Racuni.Where(x => x.KlijentId == KlijentId && x.IsDeleted == false).Select(z => new SelectListItem
+            {
+                Value = z.Id.ToString(),
+                Text = z.TipRacuna + " - " + z.BrojRacuna + ", " + z.Stanje.ToString()
+            }).ToList();
+
+        }
+        private List<SelectListItem> getMjeseciOrocenja()
+        {
+            List<SelectListItem> BrojMjeseci = new List<SelectListItem>();
+            BrojMjeseci.Add(new SelectListItem { Value = "0", Text = "-Odaberite broj mjeseci štednje-" });
+            BrojMjeseci.Add(new SelectListItem { Value = "1", Text = "1 mjesec" });
+            BrojMjeseci.Add(new SelectListItem { Value = "2", Text = "2 mjeseca" });
+            BrojMjeseci.Add(new SelectListItem { Value = "3", Text = "3 mjeseca" });
+            BrojMjeseci.Add(new SelectListItem { Value = "6", Text = "6 mjeseci" });
+            BrojMjeseci.Add(new SelectListItem { Value = "12", Text = "12 mjeseci" });
+            BrojMjeseci.Add(new SelectListItem { Value = "18", Text = "18 mjeseci" });
+            BrojMjeseci.Add(new SelectListItem { Value = "24", Text = "24 mjeseca" });
+            BrojMjeseci.Add(new SelectListItem { Value = "36", Text = "36 mjeseci" });
+            BrojMjeseci.Add(new SelectListItem { Value = "48", Text = "48 mjeseci" });
+            return BrojMjeseci;
+        }
+    }
+}

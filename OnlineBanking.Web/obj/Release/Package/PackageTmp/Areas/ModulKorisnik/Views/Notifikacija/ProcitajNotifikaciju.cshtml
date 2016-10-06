@@ -1,0 +1,46 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+@{
+//Layout = null;
+}
+@model NotifikacijaVM
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Notifikacije</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                Detalji notifikacije
+            </div>
+
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.Label("Naslov: ")
+                                @Html.TextBoxFor(Model => Model.Naslov, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Datum i vrijeme: ")
+                                @Html.TextBoxFor(Model => Model.DatumVrijeme, new { @class = "form-control",@readonly = "readonly" })
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Sadržaj: ")
+                                @Html.TextAreaFor(Model => Model.Sadrzaj, new { @class = "form-control", @cols = "60", @rows = "8", style = "resize:none", @readonly = "readonly" })
+                            </div>
+
+                            <div class="col-md-12 col-md-offset-0">
+                                    <a href="/ModulKorisnik/Notifikacija/PrikaziSveNotifikacije/?KlijentId=@Model.KlijentId" class="btn btn-primary btn-sm">Sve notifikacije</a>
+                                
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,127 @@
+﻿@using OnlineBanking.Web.Areas.ModulRadnik.ViewModels
+@model NoviKlijentVM
+
+
+<h2>Dodavanje korisnika</h2>
+<hr />
+@using (Html.BeginForm("SnimiNoviKorisnickiRacun", "Radnik", FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <!-- left column -->
+        <div class="col-md-4">
+            <div class="text-center">
+                <h6>Dodajte sliku korisnika</h6>
+                <label>Slika: </label>
+                <div class="form-group">
+                    <div class="input-group col-lg-10 input-group-sm col-lg-offset-1">
+                        <input id="file" class="btn btn-sm btn-primary" type="file" name="file" />
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(Model => Model.File, "", new { @class = "text-danger" })
+                @Html.HiddenFor(Model => Model.File)
+            </div>
+        </div>
+
+        <div class="col-md-5 personal-info">
+            <br />
+            <br />
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Ime</label>
+                    <div class="col-lg-8">
+                        @Html.TextBoxFor(Model => Model.Ime, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.Ime, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Prezime</label>
+                    <div class="col-lg-8">
+                        @Html.TextBoxFor(Model => Model.Prezime, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.Prezime, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Datum rođenja</label>
+                    <div class="col-lg-8">
+                        @Html.TextBoxFor(Model => Model.DatumRodjenja, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.DatumRodjenja, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">JMBG</label>
+                    <div class="col-lg-8">
+                        @Html.TextBoxFor(Model => Model.JMBG, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.JMBG, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Telefon</label>
+                    <div class="col-lg-8">
+                        @Html.TextBoxFor(Model => Model.Telefon, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.Telefon, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Email</label>
+                    <div class="col-lg-8">
+                        @Html.TextBoxFor(Model => Model.Email, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.Email, "", new { @class = "text-danger" })
+                        @if (ViewData["e-mail"] != null)
+	                    {
+	                    	 <span style="color:red">e-mail je već zauzet!</span>
+	                    }
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Ulica</label>
+                    <div class="col-lg-8">
+                        @Html.TextBoxFor(Model => Model.Ulica, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.Ulica, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Broj ulice</label>
+                    <div class="col-lg-8">
+                        @Html.TextBoxFor(Model => Model.BrojUlice, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.BrojUlice, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Opština</label>
+                    <div class="col-lg-8">
+                        @Html.DropDownListFor(Model => Model.OpstinaId, Model.opstine, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(Model => Model.OpstinaId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label"></label>
+                    @if (ViewData["DodanKorisnik"] == null) {
+                        <div class="col-lg-8">
+                            <input type="submit" value="Snimi korisnika" class="btn btn-primary btn-sm" />
+                        </div>
+                    }
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label"></label>
+                    @if (ViewData["DodanKorisnik"] != null) {
+                        <div class="col-lg-8">
+                            <a href="/ModulRadnik/Radnik/DodajKorisnickiRacun" class="btn btn-primary btn-sm">Dodaj novog korisnika</a>
+                        </div>
+                    }
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label"></label>
+                    @if (ViewData["DodanKorisnik"] != null) {
+                        <div class="col-lg-8">
+                            <label class="alert alert-success"> @ViewData["DodanKorisnik"] </label>
+                        </div>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+
+

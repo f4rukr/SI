@@ -1,0 +1,12 @@
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\Background.exe.config
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\Background.exe
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\Background.pdb
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\EntityFramework.dll
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\EntityFramework.SqlServer.dll
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\OnlineBanking.Data.dll
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\OnlineBanking.Data.pdb
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\EntityFramework.xml
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\bin\Debug\EntityFramework.SqlServer.xml
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\obj\Debug\Background.csprojResolveAssemblyReference.cache
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\obj\Debug\Background.exe
+D:\FIT Mostar\3.godina\5. semestar\SI\SEMINARSKI\OnlineBanking\Background\obj\Debug\Background.pdb

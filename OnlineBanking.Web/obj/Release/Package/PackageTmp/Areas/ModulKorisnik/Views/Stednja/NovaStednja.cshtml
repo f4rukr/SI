@@ -1,0 +1,79 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+@model NovaStednjaVM
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Nova oročena štednja</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                Oročena štednja
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-6">
+    @using (Html.BeginForm("SnimiNovuStednju", "Stednja"))
+    {
+        @Html.AntiForgeryToken()
+
+        if (ViewData["Stednja"] == null)
+        {
+            <h4><i><label>Klijent: </label></i> <label><strong>@Model.KlijentImePrezime</strong></label></h4>
+            <h4><i><label>Adresa: </label></i> <label><strong>@Model.KlijentAdresa</strong></label></h4>
+        }
+
+        <div class="from-group">
+            @Html.Label("Račun: ")
+            @Html.DropDownListFor(Model => Model.RacunId, Model.racuni, "Odaberite račun", new { @class = "form-control" })
+            @Html.ValidationMessageFor(Model => Model.RacunId, "", new { @class = "text-danger" })
+        </div><br />
+        <div class="from-group">
+            @Html.Label("Rok oročenja: ")
+            @Html.DropDownListFor(Model => Model.MjesecOrocenjaId, Model.mjeseciOrocenja, new { @class = "form-control" })
+            @Html.ValidationMessageFor(Model => Model.MjesecOrocenjaId, "", new { @class = "text-danger" })
+        </div><br />
+
+        if (ViewData["Stednja"] != null)
+        {
+            <div class="from-group">
+                @Html.Label("Iznos oročenja: ")
+                @Html.TextBoxFor(Model => Model.IznosOrocenja, new { @class = "form-control", @readonly = "readonly" })
+            </div><br />
+        }
+        if (ViewData["Stednja"] == null)
+        {
+            <div class="from-group">
+                @Html.Label("Iznos oročenja: ")
+                @Html.TextBoxFor(Model => Model.IznosOrocenja, new { @class = "form-control" })
+                @Html.ValidationMessageFor(Model => Model.IznosOrocenja, "", new { @class = "text-danger" })
+                @if (ViewData["Iznos"] != null)
+                {
+                    <label style="color:red">Nemate dovoljno novca na računu!</label>
+                }
+                @if (ViewData["Minimum"] != null)
+                {
+                    <label style="color:red">@ViewData["Minimum"]</label>
+                }
+            </div><br />
+        }
+        if (ViewData["Stednja"] == null)
+        {
+            <input type="submit" name="name" value="Snimi" class="btn btn-primary btn-sm" />
+        }
+        if (ViewData["Stednja"] != null)
+        {
+            <label class="alert alert-success">@ViewData["Stednja"]</label> <br />
+            @Html.ActionLink("Moje štednje", "MojeStednje", null, new { @class = "btn btn-primary btn-sm" }) @Html.Raw("&nbsp;") @Html.ActionLink("Nova štednja", "NovaStednja", null, new { @class = "btn btn-primary btn-sm" }) 
+        }
+
+    }
+    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

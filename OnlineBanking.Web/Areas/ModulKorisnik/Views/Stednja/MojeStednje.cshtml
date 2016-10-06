@@ -1,0 +1,55 @@
+﻿@using OnlineBanking.Data.Models
+@using OnlineBanking.Web.Helper
+@{
+//Layout = null;
+}
+@model List<Stednja>
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Oročena štednja</h3>
+    </div>
+</div>
+
+<div class="table-info" id="StednjeDiv">
+    <div id="datatable-wrapper" class="table-caption">
+        <table id="datatable" cellpadding="0" cellspacing="0" border="0" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Datum kreiranja</th>
+                    <th>Kraj štednje</th>
+                    <th>Račun</th>
+                    <th>Iznos oročenja</th>
+                    <th>Iznos na glavnicu</th>
+                    <th>Kamatna stopa</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Stednja item in Model)
+                {
+                    <tr>
+                        <td>@item.DatumKreiranja</td>
+                        <td>@item.KrajStednje</td>
+                        <td>@item.Racun.TipRacuna - @item.Racun.BrojRacuna</td>
+                        <td>@item.IznosOrocenja @item.Racun.Valuta</td>
+                        <td>@item.IznosNaGlavnicu @item.Racun.Valuta</td>
+                        <td>@item.KamatnaStopa</td>
+                        <td>@Ajax.ActionLink("Razročenje štednje","RazrocenjeStednje",new {StednjaId = item.Id } , new AjaxOptions { UpdateTargetId = "StednjeDiv" }, new { @class="btn btn-danger btn-sm" })</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!--Jquery Data Tables-->
+<script>
+		init.push(function () {
+			jQuery('#datatable').DataTable();
+			jQuery('#datatable-wrapper .table-caption').text('Moje oročene štednje');
+			jQuery('#datatable-wrapper .dataTables_filter input').attr('placeholder', 'Pretraga');
+		});
+</script>
+<!-- / Javascript -->

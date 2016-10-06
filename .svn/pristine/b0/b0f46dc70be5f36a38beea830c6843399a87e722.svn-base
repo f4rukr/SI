@@ -1,0 +1,42 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+@model KalkulatorVM
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Kalkulator oročene štednje</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                Kalkulator
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        @using (Ajax.BeginForm("IzracunajKalkulator", "Stednja", new AjaxOptions { UpdateTargetId = "RezultatDiv" }))
+                        {
+                            <div class="from-group">
+                                @Html.Label("Rok oročenja: ")
+                                @Html.DropDownListFor(Model => Model.MjesecOrocenjaId, Model.mjeseciOrocenja, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(Model => Model.MjesecOrocenjaId, "", new { @class = "text-danger" })
+                            </div><br />
+
+                            <div class="from-group">
+                                @Html.Label("Iznos glavnice: ")
+                                @Html.TextBoxFor(Model => Model.IznosOrocenja, new { @class = "form-control"})
+                            </div><br />
+
+                            <div id="RezultatDiv"></div>
+
+                            <input type="submit" name="name" value="Izračunaj" class="btn btn-primary btn-sm"/>
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

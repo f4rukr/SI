@@ -1,0 +1,476 @@
+﻿@using OnlineBanking.Web.Helper;
+@using OnlineBanking.Web.ViewModels;
+@using OnlineBanking.Web.Areas;
+@using OnlineBanking.Data.DAL;
+@using OnlineBanking.Data.Models;
+@using System.Data.Entity;
+@{
+    DL_Context db = new DL_Context();
+    KorisnikLoginVM korisnik = Autentifikacija.GetLogiraniKorisnik(Context);
+    List<Poruka> PrimljenePoruke = db.Poruka.Where(x => x.KlijentId == korisnik.Id && x.RadnikId != null && x.IsDeletedKlijent == false && x.Procitana == false).Include(x => x.Klijent).ToList();
+    int Neprocitane = db.Poruka.Where(x => x.KlijentId == korisnik.Id && x.RadnikId != null && x.IsDeletedKlijent == false && x.Procitana == false).Include(x => x.Klijent).Count();
+    List<Notifikacija> Notifikacije = db.Notifikacije.Where(x => x.KlijentId == korisnik.Id && x.Procitana == false).ToList();
+    int NeprocitaneNotif = db.Notifikacije.Where(x => x.KlijentId == korisnik.Id && x.Procitana == false).Count();
+}
+
+
+<!DOCTYPE html>
+<!--5
+
+TABLE OF CONTENTS.
+    
+Use search to find needed section.
+
+=====================================================
+
+|  1. $BODY                 |  Body                 |
+|  2. $MAIN_NAVIGATION      |  Main navigation      |
+|  3. $NAVBAR_ICON_BUTTONS  |  Navbar Icon Buttons  |
+|  4. $MAIN_MENU            |  Main menu            |
+|  5. $CONTENT              |  Content              |
+
+=====================================================
+
+-->
+<!--[if IE 8]>         <html class="ie8"> <![endif]-->
+<!--[if IE 9]>         <html class="ie9 gt-ie8"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="gt-ie8 gt-ie9 not-ie">
+<!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>FIT OnlineBanking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <!-- Open Sans font from Google CDN -->
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin" rel="stylesheet" type="text/css">
+
+    <!-- Pixel Admin's stylesheets -->
+    <link href="~/Areas/Content/assets/stylesheets/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Areas/Content/assets/stylesheets/pixel-admin.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Areas/Content/assets/stylesheets/widgets.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Areas/Content/assets/stylesheets/pages.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Areas/Content/assets/stylesheets/rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Areas/Content/assets/stylesheets/themes.min.css" rel="stylesheet" type="text/css">
+
+    <!--[if lt IE 9]>
+        <script src="assets/javascripts/ie.min.js"></script>
+    <![endif]-->
+
+
+    <!--Jquery UI-->
+    <script src="~/Scripts/jquery-2.1.4.js"></script>
+    <script src="~/Scripts/jquery-ui-1.11.4.js"></script>
+    <link rel="stylesheet" href="/resources/demos/style.css">
+
+</head>
+
+
+<!-- 1. $BODY ======================================================================================
+
+    Body
+
+    Classes:
+    * 'theme-{THEME NAME}'
+    * 'right-to-left'      - Sets text direction to right-to-left
+    * 'main-menu-right'    - Places the main menu on the right side
+    * 'no-main-menu'       - Hides the main menu
+    * 'main-navbar-fixed'  - Fixes the main navigation
+    * 'main-menu-fixed'    - Fixes the main menu
+    * 'main-menu-animated' - Animate main menu
+-->
+<body class="theme-default main-menu-animated">
+
+    <script>var init = [];</script>
+
+    <div id="main-wrapper">
+
+
+        <!-- 2. $MAIN_NAVIGATION ===========================================================================
+
+            Main navigation
+        -->
+        <div id="main-navbar" class="navbar navbar-inverse" role="navigation">
+            <!-- Main menu toggle -->
+            <button type="button" id="main-menu-toggle"><i class="navbar-icon fa fa-bars icon"></i><span class="hide-menu-text">HIDE MENU</span></button>
+
+            <div class="navbar-inner">
+                <!-- Main navbar header -->
+                <div class="navbar-header">
+
+                    <!-- Logo -->
+                    <a href="#" class="navbar-brand">
+                        <div><img alt="Pixel Admin" src="~/Areas/Content/assets/demo/avatars/fit-logo.jpg"></div>
+                        OnlineBanking
+                    </a>
+
+                    <!-- Main navbar toggle -->
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navbar-collapse"><i class="navbar-icon fa fa-bars"></i></button>
+
+                </div> <!-- / .navbar-header -->
+
+                <div id="main-navbar-collapse" class="collapse navbar-collapse main-navbar-collapse">
+                    <div>
+                        <div class="right clearfix">
+                            <ul class="nav navbar-nav pull-right right-navbar-nav">
+
+                                <!-- 3. $NAVBAR_ICON_BUTTONS =======================================================================
+
+                                                            Navbar Icon Buttons
+
+                                                            NOTE: .nav-icon-btn triggers a dropdown menu on desktop screens only. On small screens .nav-icon-btn acts like a hyperlink.
+
+                                                            Classes:
+                                                            * 'nav-icon-btn-info'
+                                                            * 'nav-icon-btn-success'
+                                                            * 'nav-icon-btn-warning'
+                                                            * 'nav-icon-btn-danger'
+                                -->
+                                <li class="nav-icon-btn nav-icon-btn-danger dropdown">
+                                    <a href="#notifications" class="dropdown-toggle" data-toggle="dropdown">
+                                        <span class="label">@NeprocitaneNotif</span>
+                                        <i class="nav-icon fa fa-bullhorn"></i>
+                                        <span class="small-screen-text">Notifikacije</span>
+                                    </a>
+
+                                    <!-- NOTIFICATIONS -->
+                                    <!-- Javascript -->
+                                    <script>
+									init.push(function () {
+										$('#main-navbar-notifications').slimScroll({ height: 250 });
+									});
+                                    </script>
+                                    <!-- / Javascript -->
+
+                                    <div class="dropdown-menu widget-notifications no-padding" style="width: 300px">
+                                        <div class="notifications-list" id="main-navbar-notifications">
+                                        @if (NeprocitaneNotif == 0)
+                                        {
+                                            <div class="notification">
+                                                <div class="notification-title text-warning">FIT OnlineBanking</div>
+                                                <div class="notification-description"><strong>Nemate novih notifikacija!</strong></div>
+                                                <div class="notification-ago"></div>
+                                                <div class="notification-icon fa fa-hdd-o bg-warning"></div>
+                                            </div>
+                                        }
+                                        
+                                        @if (NeprocitaneNotif > 0)
+                                        {
+                                            foreach (Notifikacija item in Notifikacije)
+                                            {
+                                                if (item.Uspjeh == 1)
+                                                {
+                                                    
+                                                        <div class="notification">
+                                                            <div class="notification-title text-success">FIT OnlineBanking</div>
+                                                            <div class="notification-description"><strong>@item.Naslov</strong></div>
+                                                            <div class="notification-ago">@item.DatumVrijeme</div>
+                                                            <a href="/ModulKorisnik/Notifikacija/ProcitajNotifikaciju/?NotifikacijaId=@item.Id"><div class="notification-icon fa fa-hdd-o bg-success"></div></a>
+                                                        </div>
+                                                }
+                                                if (item.Uspjeh == 0)
+                                                {
+                                                    
+                                                        <div class="notification">
+                                                            <div class="notification-title text-danger">FIT OnlineBanking</div>
+                                                            <div class="notification-description"><strong>@item.Naslov</strong></div>
+                                                            <div class="notification-ago">@item.DatumVrijeme</div>
+                                                            <a href="/ModulKorisnik/Notifikacija/ProcitajNotifikaciju/?NotifikacijaId=@item.Id"><div class="notification-icon fa fa-hdd-o bg-danger"></div></a>
+                                                        </div>
+                                                    <!-- / .notification -->
+                                                }
+                                                if (item.Uspjeh == 2)
+                                                {
+                                                   
+                                                        <div class="notification">
+                                                            <div class="notification-title text-info">FIT OnlineBanking</div>
+                                                            <div class="notification-description"><strong>@item.Naslov</strong></div>
+                                                            <div class="notification-ago">@item.DatumVrijeme</div>
+                                                            <a href="/ModulKorisnik/Obavijesti/PrikaziObavijest/?ObavijestId=@item.ObavijestId"><div class="notification-icon fa fa-hdd-o bg-info"></div></a>
+                                                        </div> <!-- / .notification -->
+                                                }
+                                            }
+                                        }
+
+                                        </div> <!-- / .notifications-list -->
+                                        <a href="/ModulKorisnik/Notifikacija/PrikaziSveNotifikacije/?KlijentId=@korisnik.Id" class="notifications-link">SVE NOTIFIKACIJE</a>
+                                    </div> <!-- / .dropdown-menu -->
+                                </li>
+                                <li class="nav-icon-btn nav-icon-btn-success dropdown">
+                                    <a href="mail.ru" class="dropdown-toggle" data-toggle="dropdown">
+                                        <span class="label">@Neprocitane</span>
+                                        <i class="nav-icon fa fa-envelope"></i>
+                                        <span class="small-screen-text">Primljene poruke</span>
+                                    </a>
+
+                                    <!-- MESSAGES -->
+                                    <!-- Javascript -->
+                                    <script>
+									init.push(function () {
+										$('#main-navbar-messages').slimScroll({ height: 250 });
+									});
+                                    </script>
+                                    <!-- / Javascript -->
+
+                                    <div class="dropdown-menu widget-messages-alt no-padding" style="width: 300px;">
+                                        <div class="messages-list" id="main-navbar-messages">
+                                        @if (Neprocitane > 0)
+	                                    {
+		                                   foreach (Poruka item in PrimljenePoruke)
+                                           {
+                                              <div class="message">
+                                                  <img src="~/Areas/Content/assets/demo/avatars/fit-logo.jpg" alt="" class="message-avatar">
+                                                  <a href="/ModulKorisnik/Poruke/ProcitajPrimljenuPoruku/?PorukaId=@item.Id" class="message-subject"><strong>@item.Naslov</strong></a>
+                                                  <div class="message-description">
+                                                      from <label>FIT Banka</label>
+                                                      &nbsp;&nbsp;·&nbsp;&nbsp;
+                                                      @item.DatumVrijeme
+                                                  </div>
+                                              </div> <!-- / .message -->
+                                           }
+                                        }                                    
+                                        @if (Neprocitane == 0)
+                                        {
+                                            <div class="message">
+                                                <label class="message-subject"><strong>Nemate novih poruka!</strong></label>
+                                                <div class="message-description">
+                                                    <label>FIT OnlineBanking</label>
+                                                    &nbsp;&nbsp;·&nbsp;&nbsp;
+                                                </div>
+                                            </div> <!-- / .message -->
+                                        }    
+                                        </div> <!-- / .messages-list -->
+                                        <a href="/ModulKorisnik/Poruke/PrikaziPrimljenePoruke" class="messages-link">Sve primljene poruke</a>
+                                    </div> <!-- / .dropdown-menu -->
+                                </li>
+                                <!-- /3. $END_NAVBAR_ICON_BUTTONS -->
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle user-menu" data-toggle="dropdown">
+                                        <img src="~/Content/img/@Url.Content(korisnik.SlikaPath)" alt="">
+                                        <span>@korisnik.Ime @korisnik.Prezime</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="/ModulKorisnik/Korisnik/LicniPodaci"><i class="dropdown-icon fa fa-user"></i> Lični podaci</a></li>
+                                        <li><a href="/ModulKorisnik/Korisnik/PromjenaLozinke"><i class="dropdown-icon fa fa-cog"></i>&nbsp;&nbsp;Promjena lozinke</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="/Home/Logout"><i class="dropdown-icon fa fa-power-off"></i>&nbsp;&nbsp;Log Out</a></li>
+                                    </ul>
+                                </li>
+                            </ul> <!-- / .navbar-nav -->
+                        </div> <!-- / .right -->
+                    </div>
+                </div> <!-- / #main-navbar-collapse -->
+            </div> <!-- / .navbar-inner -->
+        </div> <!-- / #main-navbar -->
+        <!-- /2. $END_MAIN_NAVIGATION -->
+        <!-- 4. $MAIN_MENU =================================================================================
+
+                Main menu
+
+                Notes:
+                * to make the menu item active, add a class 'active' to the <li>
+                  example: <li class="active">...</li>
+                * multilevel submenu example:
+                    <li class="mm-dropdown">
+                      <a href="#"><span class="mm-text">Submenu item text 1</span></a>
+                      <ul>
+                        <li>...</li>
+                        <li class="mm-dropdown">
+                          <a href="#"><span class="mm-text">Submenu item text 2</span></a>
+                          <ul>
+                            <li>...</li>
+                            ...
+                          </ul>
+                        </li>
+                        ...
+                      </ul>
+                    </li>
+        -->
+        <div id="main-menu" role="navigation">
+            <div id="main-menu-inner">
+                <div class="menu-content top" id="menu-content-demo">
+                    <!-- Menu custom content demo
+                         CSS:        styles/pixel-admin-less/demo.less or styles/pixel-admin-scss/_demo.scss
+                         Javascript: html/assets/demo/demo.js
+                     -->
+                    <div>
+                        <div class="text-bg"><span class="text-slim">Welcome,</span> <span class="text-semibold">@korisnik.Ime @korisnik.Prezime</span></div>
+
+                        <img src="~/Content/img/@Url.Content(korisnik.SlikaPath)" alt="" class="">
+                        <div class="btn-group">
+                            <a href="/ModulKorisnik/Poruke/PosaljiPoruku" class="btn btn-xs btn-primary btn-outline dark"><i class="fa fa-envelope"></i></a>
+                            <a href="/ModulKorisnik/Korisnik/LicniPodaci" class="btn btn-xs btn-primary btn-outline dark"><i class="fa fa-user"></i></a>
+                            <a href="/ModulKorisnik/Korisnik/PromjenaLozinke" class="btn btn-xs btn-primary btn-outline dark"><i class="fa fa-cog"></i></a>
+                            <a href="/Home/Logout" class="btn btn-xs btn-primary btn-outline dark"><i class="fa fa-power-off"></i></a>
+                        </div>
+                        <a href="#" class="close">&times;</a>
+                    </div>
+                </div>
+                <ul class="navigation">
+                    <li>
+                        <a href="/ModulKorisnik/Obavijesti/PrikaziObavijesti"><i class="menu-icon fa fa-list-alt"></i><span class="mm-text">Obavijesti</span></a>
+                    </li>
+                    <li>
+                        <a href="/ModulKorisnik/Korisnik/StanjeRacuna"><i class="menu-icon fa fa-info"></i><span class="mm-text">Stanje računa</span></a>
+                    </li>
+                    <li>
+                        <a href="#"><i class="menu-icon fa fa-file"></i><span class="mm-text">Pregled prometa</span></a>
+                    </li>
+                    <li class="mm-dropdown">
+                        <a href="#"><i class="menu-icon fa fa-wrench"></i><span class="mm-text">Priprema uplata</span><span class="label label-warning"></span></a>
+                        <ul>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Uplatnica/NovaUplatnicaZaPrenos"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Nalog za prenos</span></a>
+                            </li>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Uplatnica/NovaUplatnicaZaJP"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Nalog za plaćanje JP</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="mm-dropdown">
+                        <a href="#"><i class="menu-icon fa fa-clipboard"></i><span class="mm-text">Predlošci</span><span class="label label-warning"></span></a>
+                        <ul>
+
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Uplatnica/NoviPredlozak"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Novi predložak</span></a>
+                            </li>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Uplatnica/MojiPredlosci"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Moji predlošci</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="mm-dropdown">
+                        <a href="#"><i class="menu-icon fa fa-cogs"></i><span class="mm-text">Novi zahtjev</span><span class="label label-warning"></span></a>
+                        <ul>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Zahtjev/NoviZahtjev"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Novi bankovni račun</span></a>
+                            </li>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Zahtjev/ZahtjevZaBrisanjeBankovnogRacuna"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Obriši bankovni račun</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="mm-dropdown">
+                        <a tabindex="-1" href="#"><i class="menu-icon fa fa-money"></i><span class="mm-text">Oročena štednja</span></a>
+                        <ul>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Stednja/NovaStednja"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Nova štednja</span></a>
+                            </li>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Stednja/MojeStednje"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Moje štednje</span></a>
+                            </li>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Stednja/Kalkulator"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Kalkulator</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="mm-dropdown">
+                        <a href="#"><i class="menu-icon fa fa-envelope-o"></i><span class="mm-text">Poruke</span><span class="label label-warning"></span></a>
+                        <ul>
+                            <li>
+                                @*<a tabindex="-1" href="/ModulKorisnik/Poruke/PosaljiPoruku"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Pošalji poruku</span></a>*@
+                                @Html.ActionLink("Posalji poruku", "/PosaljiPoruku", "Poruke", null, new { @tabindex = "-1", @class = "menu-icon fa fa-th-list" })
+
+
+                            </li>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Poruke/PrikaziPrimljenePoruke"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Primljene</span></a>
+                            </li>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Poruke/PrikaziPoslanePoruke"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Poslane</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="mm-dropdown">
+                        <a href="#"><i class="menu-icon fa fa-male"></i><span class="mm-text">Moji podaci</span><span class="label label-warning"></span></a>
+                        <ul>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Korisnik/LicniPodaci"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Lični podaci</span></a>
+                            </li>
+                            <li>
+                                <a tabindex="-1" href="/ModulKorisnik/Korisnik/PromjenaLozinke"><i class="menu-icon fa fa-th-list"></i><span class="mm-text">Promjena lozinke</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul> <!-- / .navigation -->
+            </div> <!-- / #main-menu-inner -->
+        </div> <!-- / #main-menu -->
+        <!-- /4. $MAIN_MENU -->
+
+        @if (Session["logiraniKorisnik"] != null)
+        {
+            @Html.ActionLink("Logout", "Logout", "Autentifikacija")
+        }
+        <div id="content-wrapper">
+            @RenderBody()
+        </div> <!-- / #content-wrapper -->
+
+        <div id="main-menu-bg"></div>
+    </div> <!-- / #main-wrapper -->
+    <!-- Get jQuery from Google CDN -->
+    <!--[if !IE]> -->
+    <script type="text/javascript"> window.jQuery || document.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js">'+"<"+"/script>"); </script>
+    <!-- <![endif]-->
+    <!--[if lte IE 9]>
+        <script type="text/javascript"> window.jQuery || document.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">'+"<"+"/script>"); </script>
+    <![endif]-->
+
+    <script src="jquery.transit.js"></script>
+
+    @*<!--Jquery Data Tables-->
+    <script>
+		init.push(function () {
+			jQuery('#datatable').DataTable();
+			jQuery('#datatable-wrapper .table-caption').text('Lista obavijesti');
+			jQuery('#datatable-wrapper .dataTables_filter input').attr('placeholder', 'Pretraga');
+		});
+    </script>
+    <!-- / Javascript -->*@
+
+   
+
+
+    <!--PixelAdmin jQuery-->
+    <script type="text/javascript">
+	init.push(function () {
+		var setEqHeight = function () {
+			$('#content-wrapper .row').each(function () {
+				var $p = $(this).find('.stat-panel');
+				if (! $p.length) return;
+				$p.attr('style', '');
+				var h = $p.first().height(), max_h = h;
+				$p.each(function () {
+					h = $(this).height();
+					if (max_h < h) max_h = h;
+				});
+				$p.css('height', max_h);
+			});
+		};
+		$('#equal-height').click(function () {
+			if ($(this).hasClass('disabled')) return;
+			$(this).addClass('disabled');
+			setEqHeight();
+			$(window).on('pa.resize', setEqHeight);
+			$(window).resize();
+		});
+	});
+	window.PixelAdmin.start(init);
+    </script>
+
+    <!-- Pixel Admin's javascripts -->
+    <script src="~/Areas/Content/assets/javascripts/bootstrap.min.js"></script>
+    <script src="~/Areas/Content/assets/javascripts/pixel-admin.min.js"></script>
+
+    <script type="text/javascript">
+	init.push(function () {
+		// Javascript code here
+	});
+	window.PixelAdmin.start(init);
+    </script>
+
+    <!--Ajax skripta-->
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    
+</body>
+</html>

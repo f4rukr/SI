@@ -1,0 +1,70 @@
+﻿@using OnlineBanking.Web.Areas.ModulRadnik.ViewModels
+@model UplatnicaVM
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Uplatnica</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="background-color :#7da0ff; color:#ffffff">
+                Detalji uplatnice
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="form-group">
+                            @Html.Label("Pošiljaoc: ")
+                            @Html.TextBoxFor(Model => Model.ImePrezimeTelefon, new { @class = "form-control", style = "width:100%", @readonly = "readonly" })
+                        </div>
+                        <div class="from-group">
+                            @Html.Label("Račun pošiljaoca: ")
+                            @Html.TextBoxFor(Model => Model.BrojRacunaPošiljaoca, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Svrha doznake: ")
+                            @Html.TextBoxFor(Model => Model.SvrhaDoznake, new { @class = "form-control", style = "width:100%", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Primaoc/Primatelj: ")
+                            @Html.TextBoxFor(Model => Model.Primaoc, new { @class = "form-control", style = "width:100%", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Datum: ")
+                            @Html.TextBoxFor(Model => Model.Datum, new { @class = "form-control", style = "width:100%", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Racun primaoca/primatelja: ")
+                            @Html.TextBoxFor(Model => Model.RacunPrimaoca, new { @class = "form-control", style = "width:100%", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Iznos: ")
+                            @Html.TextBoxFor(Model => Model.Iznos, new { @class = "form-control", style = "width:100%", @readonly = "readonly" })
+                            @Html.ValidationMessageFor(Model => Model.Iznos)
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Hitno:")
+                            <label class="checkbox-inline">
+                                @Html.RadioButtonFor(Model => Model.Hitno, "true", new { @readonly = "readonly" }) Da
+                            </label>
+                            <label class="checkbox-inline">
+                                @Html.RadioButtonFor(Model => Model.Hitno, "false", new { @readonly = "readonly" }) Ne
+                            </label>
+                        </div>
+
+                        @Html.HiddenFor(Model => Model.UplatnicaId)
+                        <div class="form-group">
+                            @if (ViewData["OdbijenZahtjev"] == null) {
+                                @Html.ActionLink("Odobri", "OdobriUplatnicu", new { UplatnicaId = Model.UplatnicaId }, new { @class = "btn btn-primary btn-sm" })  @Html.ActionLink("Odbij", "OdbijUplatnicu", new { UplatnicaId = Model.UplatnicaId }, new { @class = "btn btn-warning btn-sm" })
+                            }
+                        </div>
+
+                    </div>
+                </div><!-- ROW ENDING -->
+            </div> <!-- PANEL-BODY ENDING -->
+        </div>
+    </div>
+</div> <!-- ROW ENDING -->

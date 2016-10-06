@@ -1,0 +1,151 @@
+﻿using OnlineBanking.Data.DAL;
+using OnlineBanking.Data.Models;
+using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels;
+using OnlineBanking.Web.Helper;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Web.Mvc;
+
+namespace OnlineBanking.Web.Areas.ModulKorisnik.Controllers {
+    [Autorizacija(dozvoljenoZaRadnika: false, dozvoljenoZaKorisnika: true)]
+
+    public class PorukeController : Controller {
+        private DL_Context db = new DL_Context();
+
+        #region Index
+      
+
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        #endregion
+
+        
+        #region Slanje poruke
+
+
+        public ActionResult PosaljiPoruku()
+        {
+            NovaPorukaVM model = new NovaPorukaVM();
+            model.KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            model.Odgovorena = false;
+            model.DatumVrijeme = DateTime.Now;
+
+            return View(model);
+        }
+
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult SnimiPoruku(NovaPorukaVM model)
+        {
+            if (!ModelState.IsValid)
+                return View("PosaljiPoruku", model);
+            Poruka novaPoruka = new Poruka();
+            novaPoruka.DatumVrijeme = model.DatumVrijeme.ToString();
+            novaPoruka.KlijentId = model.KlijentId;
+            novaPoruka.RadnikId = null;
+            novaPoruka.Naslov = model.Naslov;
+            novaPoruka.Sadrzaj = model.Sadrzaj;
+            novaPoruka.Odgovorena = model.Odgovorena;
+            db.Poruka.Add(novaPoruka);
+            db.SaveChanges();
+
+            return Json(new { success = true });
+
+            //return View("PosaljiPoruku");
+        } 
+        
+
+        #endregion
+        
+
+        #region Primljene poruke
+
+        public ActionResult PrikaziPrimljenePoruke()
+        {
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            List<Poruka> PrimljenePoruke = db.Poruka.Where(x => x.KlijentId == KlijentId && x.RadnikId != null && x.IsDeletedKlijent == false).Include(x => x.Klijent).ToList();
+            return View(PrimljenePoruke);
+        }
+
+        public ActionResult ProcitajPrimljenuPoruku(int PorukaId)
+        {
+            PrikaziPorukuVM model = new PrikaziPorukuVM();
+            Poruka poruka = db.Poruka.Include(x => x.Klijent).Where(y => y.Id == PorukaId).SingleOrDefault();
+            model.Sadrzaj = poruka.Sadrzaj;
+            model.Naslov = poruka.Naslov;
+            model.PorukaId = PorukaId;
+            poruka.Procitana = true;
+            db.SaveChanges();
+            return View(model);
+        }
+        #endregion
+
+       
+        #region Obrisi poruku
+
+
+        [ValidateAntiForgeryToken]
+        public ActionResult ObrisiPoruku(PrikaziPorukuVM model)
+        {
+            Poruka poruka = db.Poruka.Find(model.PorukaId);
+            poruka.IsDeletedKlijent = true;
+            db.SaveChanges();
+            ViewData["PorukaObrisana"] = "Poruka je uspješno obrisana!";
+            ModelState.Clear();
+            return View("ProcitajPrimljenuPoruku");
+        }
+
+        [ValidateAntiForgeryToken]
+        public ActionResult ObrisiPoslanuPoruku(PrikaziPorukuVM model)
+        {
+            Poruka poruka = db.Poruka.Find(model.PorukaId);
+            poruka.IsDeletedKlijent = true;
+            db.SaveChanges();
+            ViewData["PorukaObrisana"] = "Poruka je uspješno obrisana!";
+            ModelState.Clear();
+            return View("ProcitajPoslanuPoruku");
+        }
+
+        public ActionResult ObrisiPorukuBtn(int PorukaId)
+        {
+            Poruka poruka = db.Poruka.Find(PorukaId);
+            poruka.IsDeletedKlijent = true;
+            db.SaveChanges();
+            ViewData["PorukaObrisana"] = "Poruka je uspješno obrisana!";
+            ModelState.Clear();
+            return RedirectToAction("PrikaziPrimljenePoruke");
+        }
+
+
+        public ActionResult ObrisiPoslanuPorukuBtn(int PorukaId) {
+            Poruka poruka = db.Poruka.Find(PorukaId);
+            poruka.IsDeletedKlijent = true;
+            db.SaveChanges();
+            ViewData["PorukaObrisana"] = "Poruka je uspješno obrisana!";
+            ModelState.Clear();
+            return RedirectToAction("PrikaziPoslanePoruke");
+        }
+
+        #endregion
+
+        public ActionResult PrikaziPoslanePoruke() {
+            int KlijentId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            List<Poruka> PoslanePoruke = db.Poruka.Where(x => x.KlijentId == KlijentId && x.RadnikId == null && x.IsDeletedKlijent == false).Include(x => x.Klijent).ToList();
+            return View(PoslanePoruke);
+        }
+
+        public ActionResult ProcitajPoslanuPoruku(int PorukaId) {
+            PrikaziPorukuVM model = new PrikaziPorukuVM();
+            Poruka poruka = db.Poruka.Include(x => x.Klijent).Where(y => y.Id == PorukaId).SingleOrDefault();
+            model.Sadrzaj = poruka.Sadrzaj;
+            model.Naslov = poruka.Naslov;
+            model.PorukaId = PorukaId;
+            return View(model);
+        }
+    }
+}

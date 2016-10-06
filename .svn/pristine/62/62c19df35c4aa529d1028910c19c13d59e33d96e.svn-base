@@ -1,0 +1,38 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+@{
+//Layout = null;
+}
+@model StanjeRacunaVM
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Stanje Računa</h3>
+    </div>
+</div>
+@using (Ajax.BeginForm("StanjeRacunaDetalji", "Korisnik", new AjaxOptions { UpdateTargetId = "DetaljiDiv" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="form-group">
+                    <div class="col-lg-5">
+                        @Html.DropDownListFor(Model => Model.BrojRacuna, Model.tipoviRacuna, new { @class = "form-control" })
+                    </div>
+                    <div>
+                        <input type="submit" value="Detaljan pregled" class="btn btn-primary btn-microsoft" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="panel-body">
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="DetaljiDiv">
+
+            </div>
+        </div>
+    </div>
+</div>

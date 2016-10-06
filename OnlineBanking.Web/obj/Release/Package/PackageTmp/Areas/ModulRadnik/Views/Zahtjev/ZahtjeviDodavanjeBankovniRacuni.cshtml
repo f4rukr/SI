@@ -1,0 +1,48 @@
+﻿@using OnlineBanking.Data.Models
+@using OnlineBanking.Web.Helper
+@{
+//Layout = null;
+}
+@model List<Zahtjev>
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Zahtjevi na čekanju</h3>
+    </div>
+</div>
+
+<div class="table-info">
+    <div id="datatable-wrapper" class="table-caption">
+        <table id="datatable" cellpadding="0" cellspacing="0" border="0" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Klijent</th>
+                    <th>Datum kreiranja</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Zahtjev item in Model)
+                {
+                    <tr>
+                        <td>@item.Klijent.Ime @item.Klijent.Prezime</td>
+                        <td>@item.DatumKreiranja</td>
+                        <td>
+                            @Html.ActionLink("Opširnije", "PrikaziZahtjev", new { ZahtjevId = item.Id }, new { @class = "btn btn-primary btn-sm" })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--Jquery Data Tables-->
+<script>
+    init.push(function () {
+        jQuery('#datatable').DataTable();
+        jQuery('#datatable-wrapper .table-caption').text('Lista zahtjeva');
+        jQuery('#datatable-wrapper .dataTables_filter input').attr('placeholder', 'Pretraga');
+    });
+</script>
+<!-- / Javascript -->

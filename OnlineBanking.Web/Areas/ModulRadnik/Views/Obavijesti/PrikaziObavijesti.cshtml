@@ -1,0 +1,80 @@
+﻿@using OnlineBanking.Data.Models
+@using OnlineBanking.Web.Helper
+@{
+//Layout = null;
+}
+@model List<Obavijest>
+
+<div class="row">
+    <div class="col-lg-12">
+        <h3 class="page-header">Obavijesti</h3>
+    </div>
+</div>
+
+<div class="table-info">
+    <div id="datatable-wrapper" class="table-caption">
+        <table id="datatable" cellpadding="0" cellspacing="0" border="0" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Naslov</th>
+                    <th>Datum i vrijeme</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Obavijest item in Model)
+                {
+                    <tr>
+                        <td>@item.Naslov</td>
+                        <td>@item.DatumVrijeme</td>
+                        <td>
+                            @Ajax.ActionLink("Procitaj obavijest", "PrikaziObavijest", "Obavijesti", new { ObavijestId = item.Id},
+    new AjaxOptions() { UpdateTargetId = "obavijestiDiv", OnSuccess = "otvoriDialog" }, new { @class = "btn btn-info btn-sm" })
+                         
+                            @if (item.RadnikId == Autentifikacija.GetLogiraniKorisnik(Context).Id)
+                            {
+                                 @Html.ActionLink("Obriši obavijest", "ObrisiObavijestIzListe", new { ObavijestId = item.Id }, new { @class = "btn btn-danger btn-sm" }) 
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function otvoriDialog() {
+        $('#myModal').modal();
+    }
+</script>
+    <div id="myModal" class="modal fade in" tabindex="-1" role="dialog" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="myModalLabel">Obavijesti</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="obavijestiDiv">
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Zatvori</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<!--Jquery Data Tables-->
+<script>
+    init.push(function () {
+        jQuery('#datatable').DataTable();
+        jQuery('#datatable-wrapper .table-caption').text('Obavijesti');
+        jQuery('#datatable-wrapper .dataTables_filter input').attr('placeholder', 'Pretraga');
+    });
+</script>
+<!-- / Javascript -->

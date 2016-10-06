@@ -1,0 +1,43 @@
+﻿@using OnlineBanking.Data.Models;
+@{
+    //Layout = null;
+}
+@model List<Drzava>
+<!DOCTYPE html>
+
+<br />
+<div class="row">
+    <div class="col-lg-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Države
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Naziv države</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (Drzava x in Model)
+                            {
+                                <tr>
+                                    <td>@x.Naziv</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-6 -->
+
+</div>
+  

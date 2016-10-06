@@ -1,0 +1,221 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using OnlineBanking.Data.Models;
+using OnlineBanking.Data.DAL;
+using OnlineBanking.Web.Areas.ModulRadnik.ViewModels;
+using System.Data.Entity;
+using OnlineBanking.Web.Helper;
+
+namespace OnlineBanking.Web.Areas.ModulRadnik.Controllers
+{
+    [Autorizacija(dozvoljenoZaRadnika: true, dozvoljenoZaKorisnika: false)]
+    public class ZahtjevController : Controller
+    {
+        DL_Context db = new DL_Context();
+        // GET: ModulRadnik/Zahtjev
+        public ActionResult Index()
+        {
+            return View();
+        }
+        public ActionResult ZahtjeviDodavanjeBankovniRacuni()
+        {
+            List<Zahtjev> listaZahtjeva = db.Zahtjevi.Include(x => x.Klijent).Where(x => x.RadnikId == null && x.TipZahtjevaId == 1).ToList();
+            return View(listaZahtjeva);
+        }
+        public ActionResult ZahtjeviBrisanjeBankovniRacuni()
+        {
+            List<Zahtjev> listaZahtjeva = db.Zahtjevi.Include(x => x.Klijent).Where(x => x.RadnikId == null && x.TipZahtjevaId == 3 && x.RacunId != null).ToList();
+            return View(listaZahtjeva);
+        }
+        public ActionResult PrikaziZahtjev(int ZahtjevId, int? NotifikacijaId)
+        {
+            if (NotifikacijaId != null) {
+
+                Notifikacija not = db.Notifikacije.Find(NotifikacijaId);
+                not.Procitana = true;
+                db.SaveChanges();
+            }
+            Zahtjev zahtjev = db.Zahtjevi.Find(ZahtjevId);
+            PrikaziZahtjevVM model = new PrikaziZahtjevVM();
+            model.ZahtjevId = zahtjev.Id;
+            model.KlijentId = zahtjev.KlijentId;
+            model.Klijent = db.Klijenti.Where(x => x.Id == model.KlijentId).SingleOrDefault();
+            model.KlijentImePrezime = model.Klijent.Ime + " " + model.Klijent.Prezime;
+            model.DatumKreiranja = zahtjev.DatumKreiranja;
+            model.Opis = zahtjev.Opis;
+            model.TipRacunaId = zahtjev.TipRacunaId;
+            model.TipRacunaEnum = (TipRacuna)zahtjev.TipRacunaId;
+            model.JMBG = model.Klijent.JMBG;
+            model.TipValute = zahtjev.TipValute;
+            return View(model);
+        }
+        public ActionResult PrikaziZahtjevZaBrisanje(int ZahtjevId, int? NotifikacijaId)
+        {
+            if (NotifikacijaId != null) {
+
+                Notifikacija not = db.Notifikacije.Find(NotifikacijaId);
+                not.Procitana = true;
+                db.SaveChanges();
+            }
+            Zahtjev zahtjev = db.Zahtjevi.Find(ZahtjevId);
+            PrikaziZahtjevVM model = new PrikaziZahtjevVM();
+            model.ZahtjevId = zahtjev.Id;
+            model.Klijent = db.Klijenti.Find(zahtjev.KlijentId);
+            model.KlijentImePrezime = model.Klijent.Ime + " " + model.Klijent.Prezime;
+            model.DatumKreiranja = zahtjev.DatumKreiranja;
+            model.Opis = zahtjev.Opis;
+            model.TipRacunaEnum = (TipRacuna)zahtjev.TipRacunaId;
+            model.Racun = db.Racuni.Find(zahtjev.RacunId);
+            model.JMBG = model.Klijent.JMBG;
+            return View(model);
+        }
+        public ActionResult ProcesirajZahtjev(int? ZahtjevId, int uspjeh = 0)
+        {
+            NoviRacunVM model = new NoviRacunVM();
+            if (uspjeh == 0)
+            {
+                Zahtjev zahtjev = db.Zahtjevi.Find(ZahtjevId);
+                zahtjev.Status = "Odobren";
+                zahtjev.RadnikId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                db.SaveChanges();
+
+                model.KlijentId = zahtjev.KlijentId;
+                model.RadnikId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+                model.TipRacunaId = zahtjev.TipRacunaId;
+                model.Stanje = 0;
+                model.ZahtjevId = ZahtjevId;
+            }
+            if (uspjeh == 1)
+            {
+                ViewData["SnimljenRacun"] = "Zahtjev je uspješno procesiran.";
+            }
+            return View(model);
+        }
+        public ActionResult ProcesirajZahtjevZaBrisanje(int ZahtjevId)
+        {
+            Notifikacija not = db.Notifikacije.Where(x => x.ZahtjevId == ZahtjevId).SingleOrDefault();
+            not.Procitana = true;
+            db.SaveChanges();
+            Zahtjev zahtjev = db.Zahtjevi.Find(ZahtjevId);
+            zahtjev.Status = "Odobren";
+            zahtjev.RadnikId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Racun racun = db.Racuni.Find(zahtjev.RacunId);
+            racun.IsDeleted = true;
+            Notifikacija notifikacija = new Notifikacija();
+            notifikacija.Procitana = false;
+            notifikacija.KlijentId = zahtjev.KlijentId;
+            notifikacija.Naslov = "Zahtjev za brisanje -" + racun.TipRacuna + "- bankovnog računa";
+            notifikacija.Uspjeh = 1;
+            notifikacija.DatumVrijeme = DateTime.Now.ToString();
+            notifikacija.Sadrzaj = "Vaš zahtjev za brisanje bankovnog računa je prihvaćen. U vezi dodatnih informacija obratite se vašoj obližnjoj poslovnici. Vaša banka.";
+            db.Notifikacije.Add(notifikacija);
+            string mail = "";
+            Klijent klijent = db.Klijenti.Find(zahtjev.KlijentId);
+            mail += "<h3> Poštovani " + klijent.Ime + " " + klijent.Prezime + ",</h3><br/><br/>";
+            mail += "Vaš zahtjev za brisanje -" + racun.TipRacuna + "- bankovnog računa je prihvaćen. U vezi dodatnih informacija obratite se vašoj obližnjoj poslovnici.<br/><br/>Vaša banka.";
+            Email.Posalji("FIT Banka", mail, klijent.Email);
+            db.SaveChanges();
+
+            ViewData["ProcesirajZahtjevZaBrisanje"] = "Zahtjev je uspješno procesiran.";
+            return View("PrikaziZahtjevZaBrisanje");
+        }
+        [ValidateAntiForgeryToken]
+        public ActionResult SnimiBankovniRacun(NoviRacunVM model)
+        {
+            Notifikacija not = db.Notifikacije.Where(x => x.ZahtjevId == model.ZahtjevId).SingleOrDefault();
+            not.Procitana = true;
+            db.SaveChanges();
+            Racun racun = new Racun();
+            racun.KlijentId = model.KlijentId;
+            racun.RadnikId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            racun.Stanje = model.Stanje;
+            racun.DatumOtvaranja = DateTime.Now.ToString();
+            racun.Valuta = model.TipValute;
+            racun.Limit = model.Limit;
+            racun.TipRacuna = (TipRacuna)model.TipRacunaId;
+
+            string templateRacuna = "555000";
+            int seed = db.Racuni.Max(x => x.Id);
+            seed++;           
+            racun.BrojRacuna = templateRacuna + seed.ToString("D10");
+            
+            Notifikacija notifikacija = new Notifikacija();
+            notifikacija.Procitana = false;
+            notifikacija.KlijentId = model.KlijentId;
+            TipRacuna tipRacuna = (TipRacuna)model.TipRacunaId;
+            notifikacija.Naslov = "Zahtjev za novim -" + tipRacuna + "- bankovnim računom";
+            notifikacija.Uspjeh = 1;
+            notifikacija.DatumVrijeme = DateTime.Now.ToString();
+            notifikacija.Sadrzaj = "Vaš zahtjev za novim bankovnim računom je prihvaćen. U vezi dodatnih informacija obratite se vašoj obližnjoj poslovnici.Vaša banka.";
+            db.Notifikacije.Add(notifikacija);
+            db.Racuni.Add(racun);
+            string mail = "";
+            Klijent klijent = db.Klijenti.Find(model.KlijentId);
+            mail += "<h3> Poštovani " + klijent.Ime + " " + klijent.Prezime + ",</h3><br/><br/>";
+            mail += "Vaš zahtjev za novim -" + tipRacuna + "- bankovnim računom je prihvaćen.<br/><br/>Broj bankovnog računa:<b> " + racun.BrojRacuna + "</b><br/><br/>U vezi dodatnih informacija obratite se vašoj obližnjoj poslovnici.<br/><br/>Vaša banka.";
+            Email.Posalji("FIT Banka", mail, klijent.Email);
+            db.SaveChanges();
+            
+            return RedirectToAction("ProcesirajZahtjev", new { uspjeh = 1 });
+        }
+        public ActionResult OdbijZahtjev(int ZahtjevId)
+        {
+            Notifikacija not = db.Notifikacije.Where(x => x.ZahtjevId == ZahtjevId).FirstOrDefault();
+            not.Procitana = true;
+            db.SaveChanges();
+            Zahtjev zahtjev = db.Zahtjevi.Include(x => x.TipZahtjeva).Where(x => x.Id == ZahtjevId).SingleOrDefault();
+            zahtjev.Status = "Odbijen";
+            zahtjev.RadnikId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Notifikacija notifikacija = new Notifikacija();
+            notifikacija.Procitana = false;
+            notifikacija.KlijentId = zahtjev.KlijentId;
+            TipRacuna tipRacuna = (TipRacuna)zahtjev.TipRacunaId;
+            notifikacija.Naslov = "Zahtjev za novim -" + tipRacuna + "- bankovnim računom";
+            notifikacija.Uspjeh = 0;
+            notifikacija.DatumVrijeme = DateTime.Now.ToString();
+            notifikacija.Sadrzaj = "Vaš zahtjev za novim bankovnim računom je odbijen. U vezi dodatnih pitanja obratite se vašoj obližnjoj poslovnici.Vaša banka.";
+            db.Notifikacije.Add(notifikacija);
+            db.SaveChanges();
+            string mail = "";
+            Klijent klijent = db.Klijenti.Find(zahtjev.KlijentId);
+            mail += "<h3> Poštovani " + klijent.Ime + " " + klijent.Prezime + ",</h3><br/><br/>";
+            mail += "Vaš zahtjev za novim -" + tipRacuna + "- bankovnim računom je odbijen. U vezi dodatnih informacija obratite se vašoj obližnjoj poslovnici.<br/><br/>Vaša banka.";
+            Email.Posalji("FIT Banka", mail, klijent.Email);
+            ViewData["OdbijenZahtjev"] = "Zahtjev je uspješno odbijen.";
+
+            return View("PrikaziZahtjev");
+        }
+        public ActionResult OdbijZahtjevZaBrisanje(int ZahtjevId)
+        {
+            Notifikacija not = db.Notifikacije.Where(x => x.ZahtjevId == ZahtjevId).FirstOrDefault();
+            not.Procitana = true;
+            db.SaveChanges();
+            Zahtjev zahtjev = db.Zahtjevi.Include(x => x.TipZahtjeva).Where(x => x.Id == ZahtjevId).SingleOrDefault();
+            zahtjev.Status = "Odbijen";
+            zahtjev.RadnikId = Autentifikacija.GetLogiraniKorisnik(HttpContext).Id;
+            Notifikacija notifikacija = new Notifikacija();
+            not.Procitana = false;
+            not.KlijentId = zahtjev.KlijentId;
+            TipRacuna tipRacuna = (TipRacuna)zahtjev.TipRacunaId;
+            not.Naslov = "Zahtjev za brisanje -" + tipRacuna + "- bankovnog računa";
+            not.Uspjeh = 0;
+            not.DatumVrijeme = DateTime.Now.ToString();
+            Racun r = db.Racuni.Where(x => x.Id == zahtjev.RacunId).SingleOrDefault();
+            not.Sadrzaj = "Vaš zahtjev za brisanje bankovnog računa je odbijen.\nZa brisanje bankovnog računa, stanje na vašem računu mora biti 0,00 "+ r.Valuta + "U vezi dodatnih pitanja obratite se vašoj obližnjoj poslovnici.\nVaša banka.";
+            db.Notifikacije.Add(not);
+            db.SaveChanges();
+            string mail = "";
+            Klijent klijent = db.Klijenti.Find(zahtjev.KlijentId);
+            mail += "<h3> Poštovani " + klijent.Ime + " " + klijent.Prezime + ",</h3><br/><br/>";
+            mail += "Vaš zahtjev za brisanje -" + tipRacuna + "- bankovnog računa je odbijen.<br/>Za brisanje bankovnog računa, stanje na vašem računu mora biti 0,00 " + r.Valuta + "<br/><br/>U vezi dodatnih pitanja obratite se vašoj obližnjoj poslovnici.<br/><br/>Vaša banka.";
+            Email.Posalji("FIT Banka", mail, klijent.Email);
+
+            ViewData["ProcesirajZahtjevZaBrisanje"] = "Zahtjev je uspješno odbijen.";
+            return View("PrikaziZahtjevZaBrisanje");
+        }
+        
+    }
+}

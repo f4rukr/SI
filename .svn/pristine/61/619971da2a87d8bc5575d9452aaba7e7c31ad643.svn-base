@@ -1,0 +1,23 @@
+﻿@using OnlineBanking.Web.Areas.ModulKorisnik.ViewModels
+@{
+    Layout = null;
+}
+@model KalkulatorVM
+
+    <div> 
+        @if (ViewData["IzracunGreska"] != null)
+        {
+            <label class="alert alert-danger">@ViewData["IzracunGreska"]</label>
+        }
+        @if (ViewData["IzracunGreska"] == null)
+        {
+            <h5><label>Tip oročenja: <b>Standardno</b></label> </h5>
+            <h5><label>Kamatna stopa: </label> <b>@Model.KamatnaStopa</b></h5>
+            <h5><label>Glavnica: </label> <b>@Model.IznosOrocenja</b></h5> 
+            <h5><label>Ukupno kamata: </label> <b>@Model.UkupnoKamata</b> </h5> <hr />
+            <h5><label><u>Saldo</u>:</label> <b>@Model.Saldo </b></h5>
+            <br /><br />
+        }
+        
+    </div>
+
